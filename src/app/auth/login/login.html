@@ -1,0 +1,37 @@
+<div class="container container-fluid d-flex flex-column flex-sm-row justify-content-center align-items-center py-5 min-vh-100">
+
+  <!-- Left Card: Logo & Microsoft Login -->
+  <div class="card w-50 w-sm-50 mb-4 mb-lg-0 p-4 border-0 text-center align-items-center rounded-5 logo-card">
+    <img ngSrc="assets/univen-logo.png" alt="University Logo" class="img-fluid mb-3" height="457" width="545">
+    <h4 class="fw-bold text-dark mb-0">University of Venda</h4>
+    <p class="text-secondary mb-4">Intern Online Register System</p>
+  </div>
+
+  <!-- Right Card: Login Form -->
+  <div class="card w-50 w-sm-50 p-5 shadow-lg rounded-5 login-card border-0">
+    <h3 class="mb-4 text-center fw-bold text-dark">Login</h3>
+    <form>
+      <div class="mb-3">
+        <label for="email" class="form-label fw-bold text-secondary">Email Address</label>
+        <input type="email" id="email" class="form-control shadow-sm" placeholder="name.surname@univen.ac.za" required>
+      </div>
+      <div class="mb-4">
+        <label for="password" class="form-label fw-bold text-secondary">Password</label>
+        <input type="password" id="password" class="form-control shadow-sm" placeholder="Enter password" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm mb-3" routerLink="/intern/intern-dashboard">
+        Login
+      </button>
+    </form>
+
+    <hr class="my-4">
+
+    <p class="text-center text-muted mb-3">or continue with</p>
+    <!-- Microsoft Account Button -->
+    <button class="btn btn-dark w-100 py-2 d-flex justify-content-center align-items-center shadow-sm">
+      <span class="bi bi-windows me-2 fs-5"></span>
+      <span class="fw-bold">Microsoft Account</span>
+    </button>
+  </div>
+
+</div>

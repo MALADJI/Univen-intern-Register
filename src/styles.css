@@ -1,0 +1,11 @@
+body{
+  background-color: whitesmoke !important;
+  scroll-behavior: smooth;
+}
+.card {
+  border-radius: 10px;
+}
+
+.table th, .table td {
+  vertical-align: middle;
+}

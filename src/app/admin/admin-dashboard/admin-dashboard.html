@@ -1,0 +1,59 @@
+<div class="container container-fluid">
+  <h2>Admin Dashboard</h2>
+
+  <!-- Manage Interns -->
+  <div class="card shadow-sm p-3 mb-4">
+    <h5>Manage Interns</h5>
+    <button class="btn btn-primary mb-2">Add Intern</button>
+    <table class="table table-hover">
+      <thead class="table-light">
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Supervisor</th>
+        <th>Department</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td>John Doe</td>
+        <td>johndoe&#64;email.com</td>
+        <td>Mr. Smith</td>
+        <td>IT</td>
+        <td>
+          <button class="btn btn-sm btn-warning me-1">Edit</button>
+          <button class="btn btn-sm btn-danger">Delete</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Reports -->
+  <div class="card shadow-sm p-3">
+    <h5>Generate Reports</h5>
+    <form>
+      <div class="row mb-2">
+        <div class="col-md-4">
+          <label>Department</label>
+          <select class="form-control">
+            <option>All</option>
+            <option>IT</option>
+            <option>HR</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label>From</label>
+          <input type="date" class="form-control" />
+        </div>
+        <div class="col-md-4">
+          <label>To</label>
+          <input type="date" class="form-control" />
+        </div>
+      </div>
+      <button class="btn btn-success me-2">Export PDF</button>
+      <button class="btn btn-info">Export Excel</button>
+    </form>
+  </div>
+</div>
