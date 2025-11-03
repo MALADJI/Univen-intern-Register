@@ -1,0 +1,399 @@
+<!-- ===================== SUPERVISOR DASHBOARD ===================== -->
+<div class="container py-4">
+
+  <!-- ===== 👤 SUPERVISOR USER CARD ===== -->
+  <div class="card shadow-sm border-0 p-3 d-flex flex-column flex-md-row align-items-center gap-3 mb-4">
+    <div class="logo-container flex-shrink-0">
+      <img src="assets/univen-logo.png" alt="University Logo"
+           class="img-fluid rounded-circle"
+           style="width: 60px; height: 60px; object-fit: cover;">
+    </div>
+    <div class="supervisor-info text-center text-md-start">
+      <h5 class="mb-1 fw-bold">{{ supervisor.name }}</h5>
+      <p class="mb-0 text-muted small">{{ supervisor.email }}</p>
+      <span class="badge bg-danger mt-1">{{ supervisor.role }}</span>
+      <span class="badge bg-primary ms-2 mt-1">{{ supervisor.Department }}</span>
+      <span class="badge bg-primary ms-2 mt-1">{{ supervisor.field }}</span>
+    </div>
+  </div>
+
+  <!-- ===== NAVIGATION ===== -->
+  <ul class="nav nav-pills justify-content-center mb-4">
+    <li class="nav-item" *ngFor="let section of ['overview', 'interns', 'Intern Leave status', 'history', 'reports']">
+      <button
+        class="nav-link px-4 fw-semibold"
+        [ngClass]="{ active: activeSection === section }"
+        (click)="showSection(section)">
+        {{ section }}
+      </button>
+    </li>
+  </ul>
+
+  <!-- ===================== OVERVIEW SECTION ===================== -->
+  <div *ngIf="activeSection === 'overview'">
+    <!-- Overview Cards -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-3" *ngFor="let stat of overviewStats">
+        <div class="card shadow-sm border-0 rounded-4 text-center py-4">
+          <div class="text-{{ stat.color }} fs-2 mb-2"><i [class]="stat.icon"></i></div>
+          <h5 class="fw-semibold">{{ stat.label }}</h5>
+          <p class="fs-4 fw-bold mb-0">{{ stat.value }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance Summary Table -->
+    <div class="card shadow-sm p-4 mb-4">
+      <h5 class="text-primary fw-bold mb-3"><i class="bi bi-graph-up me-2"></i>Intern Attendance Summary</h5>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+          <tr>
+            <th>Intern</th>
+            <th>Department</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>On Leave</th>
+            <th>Attendance %</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let data of overviewAttendance">
+            <td>{{ data.name }}</td>
+            <td>{{ data.department }}</td>
+            <td class="text-success fw-semibold">{{ data.present }}</td>
+            <td class="text-danger fw-semibold">{{ data.absent }}</td>
+            <td class="text-warning fw-semibold">{{ data.leave }}</td>
+            <td><span class="badge bg-primary">{{ data.attendanceRate }}%</span></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Leave Overview Table -->
+    <div class="card shadow-sm p-4">
+      <h5 class="text-primary fw-bold mb-3"><i class="bi bi-calendar-check me-2"></i>Recent Leave Requests</h5>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+          <tr>
+            <th>Intern</th>
+            <th>Department</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Reason</th>
+            <th>Status</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let leave of overviewLeaves">
+            <td>{{ leave.name }}</td>
+            <td>{{ leave.department }}</td>
+            <td>{{ leave.startDate }}</td>
+            <td>{{ leave.endDate }}</td>
+            <td>{{ leave.reason }}</td>
+            <td>
+                <span class="badge rounded-pill"
+                      [ngClass]="{
+                        'bg-success': leave.status === 'Approved',
+                        'bg-warning text-dark': leave.status === 'Pending',
+                        'bg-danger': leave.status === 'Declined'
+                      }">
+                  {{ leave.status }}
+                </span>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== INTERNS SECTION ===================== -->
+  <div *ngIf="activeSection === 'interns'">
+    <div class="card shadow-sm p-4 mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-primary fw-bold mb-0"><i class="bi bi-people-fill me-2"></i>Interns</h4>
+        <input type="text" [(ngModel)]="internSearch" placeholder="Search interns..." class="form-control w-auto" />
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Supervisor</th>
+            <th>Department</th>
+            <th>Field</th>
+            <th>Status</th>
+            <th class="text-center">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let intern of filteredInterns; let i = index">
+            <td>{{ intern.name }}</td>
+            <td>{{ intern.email }}</td>
+            <td>{{ intern.supervisor }}</td>
+            <td>{{ intern.department }}</td>
+            <td>{{ intern.field }}</td>
+            <td>
+                <span class="badge rounded-pill"
+                      [ngClass]="{
+                        'bg-success': intern.status === 'Present',
+                        'bg-warning text-dark': intern.status === 'On Leave',
+                        'bg-danger': intern.status === 'Absent'
+                      }">
+                  {{ intern.status }}
+                </span>
+            </td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-primary rounded-5 me-2" (click)="openEditModal(i)">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger rounded-5" (click)="removeIntern(i)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== LEAVE STATUS SECTION ===================== -->
+  <div *ngIf="activeSection === 'Intern Leave status'">
+    <h4 class="mb-4 fw-bold text-primary text-center">Intern Leave Requests</h4>
+    <div *ngIf="clearedLeaveRequests.length > 0" class="mb-3 text-center">
+      <button class="btn btn-warning rounded-5" (click)="undoClear()">
+        <i class="bi bi-arrow-counterclockwise me-1"></i> Undo Cleared Requests
+      </button>
+    </div>
+    <div class="row g-4">
+      <div class="col-12 col-md-6 col-lg-4" *ngFor="let request of leaveRequests; let i = index">
+        <div class="card shadow-sm border-start border-4 rounded-4 h-100 p-3"
+             [ngClass]="{
+               'border-success': request.status === 'Approved',
+               'border-warning': request.status === 'Pending',
+               'border-danger': request.status === 'Declined'
+             }">
+          <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-person-circle fs-3 text-secondary me-2"></i>
+            <h5 class="mb-0 fw-semibold">{{ request.name }}</h5>
+          </div>
+          <p class="text-muted mb-1"><i class="bi bi-envelope me-1"></i>{{ request.email }}</p>
+          <p class="text-muted mb-1"><i class="bi bi-building me-1"></i>{{ request.department }}</p>
+          <p class="mb-1"><strong>Reason:</strong> {{ request.reason }}</p>
+          <p class="mb-3"><strong>Dates:</strong> {{ request.startDate }} - {{ request.endDate }}</p>
+          <div *ngIf="request.document" class="mb-3">
+            <a [href]="request.document" target="_blank" class="text-decoration-none text-info">
+              <i class="bi bi-paperclip me-1"></i> View Supporting Document
+            </a>
+          </div>
+          <p class="mb-3">
+            <strong>Status:</strong>
+            <span class="badge rounded-pill"
+                  [ngClass]="{
+                    'bg-success': request.status === 'Approved',
+                    'bg-warning text-dark': request.status === 'Pending',
+                    'bg-danger': request.status === 'Declined'
+                  }">
+              {{ request.status }}
+            </span>
+          </p>
+          <div class="mt-auto d-flex justify-content-between">
+            <button class="btn btn-success btn-sm rounded-5" (click)="approveRequest(request)">
+              <i class="bi bi-check-circle me-1"></i> Approve
+            </button>
+            <button class="btn btn-danger btn-sm rounded-5" (click)="declineRequest(request)">
+              <i class="bi bi-x-circle me-1"></i> Decline
+            </button>
+            <button class="btn btn-outline-secondary btn-sm rounded-5" (click)="clearLeaveRequest(i)">
+              <i class="bi bi-trash me-1"></i> Clear
+            </button>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="leaveRequests.length === 0 && clearedLeaveRequests.length === 0" class="col-12 text-center mt-4">
+        <p class="text-muted fs-5">No leave requests found.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== ATTENDANCE HISTORY SECTION ===================== -->
+  <div *ngIf="activeSection === 'history'">
+    <div class="card shadow-sm p-4 mb-4">
+      <h4 class="text-primary fw-bold mb-3">
+        <i class="bi bi-clock-history me-2"></i> Attendance History
+      </h4>
+      <hr>
+
+      <!-- Filters -->
+      <div class="row g-3 align-items-end mb-4">
+        <div class="col-md-3">
+          <label class="form-label fw-medium">Monday Date</label>
+          <input type="date" class="form-control" [(ngModel)]="historyFilterMonday">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-medium">Friday Date</label>
+          <input type="date" class="form-control" [(ngModel)]="historyFilterFriday">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-medium">Intern Name</label>
+          <input type="text" class="form-control" [(ngModel)]="historyFilterName">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-medium">Department</label>
+          <select class="form-select" [(ngModel)]="historyFilterDepartment" (change)="updateHistoryFields()">
+            <option value="">All</option>
+            <option *ngFor="let dept of departmentList" [value]="dept">{{ dept }}</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-medium">Field</label>
+          <select class="form-select" [(ngModel)]="historyFilterField">
+            <option value="">All</option>
+            <option *ngFor="let field of filteredFieldsForHistory" [value]="field">{{ field }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div *ngIf="weekendSelected" class="alert alert-warning text-center">
+        ⚠️ Please select Monday and Friday dates correctly.
+      </div>
+
+      <div class="text-center mb-3">
+        <button class="btn btn-outline-primary rounded-5 me-2" (click)="filteredLogs = getWeeklyRegister()">
+          <i class="bi bi-funnel me-1"></i> Filter
+        </button>
+        <button class="btn btn-outline-secondary rounded-5" (click)="resetHistoryFilter()">
+          <i class="bi bi-arrow-repeat me-1"></i> Reset
+        </button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle text-center">
+          <thead class="table-light">
+          <tr>
+            <th>Intern</th>
+            <th *ngFor="let day of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']">{{ day }}</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let intern of internsForWeek">
+            <td class="fw-semibold text-center">{{ intern.name }}</td>
+            <td *ngFor="let day of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']">
+              <span class="badge"
+                    [ngClass]="{
+                      'bg-success': intern.recordsByDay[day].action === 'Signed In',
+                      'bg-danger': intern.recordsByDay[day].action === 'Signed Out',
+                      'bg-warning text-dark': intern.recordsByDay[day].action === 'On Leave',
+                      'bg-secondary': intern.recordsByDay[day].action === 'Absent'
+                    }">
+                {{ intern.recordsByDay[day].action }}
+              </span>
+              <div class="small text-muted mt-1">
+                {{ intern.recordsByDay[day].timeIn ? (intern.recordsByDay[day].timeIn | date:'HH:mm') : '-' }}
+                –
+                {{ intern.recordsByDay[day].timeOut ? (intern.recordsByDay[day].timeOut | date:'HH:mm') : '-' }}
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="internsForWeek.length === 0">
+            <td colspan="6" class="text-center text-muted">No attendance data found for this week.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===================== REPORTS SECTION ===================== -->
+  <div *ngIf="activeSection === 'reports'">
+    <div class="card shadow-sm p-4 mb-4">
+      <h4 class="text-primary fw-bold mb-3"><i class="bi bi-file-earmark-text me-2"></i> Reports</h4>
+      <hr>
+      <!-- Filters -->
+      <div class="row g-3 align-items-end mb-4">
+        <div class="col-md-2">
+          <label class="form-label fw-medium">Intern Name</label>
+          <input type="text" class="form-control" [(ngModel)]="reportInternName">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-medium">Department</label>
+          <select class="form-select" [(ngModel)]="reportDepartment" (change)="updateReportFields()">
+            <option value="">All</option>
+            <option *ngFor="let dept of departmentList" [value]="dept">{{ dept }}</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-medium">Field</label>
+          <select class="form-select" [(ngModel)]="reportField">
+            <option value="">All</option>
+            <option *ngFor="let field of filteredFieldsForReport" [value]="field">{{ field }}</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-medium">From Date</label>
+          <input type="date" class="form-control" [(ngModel)]="reportFromDate">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-medium">To Date</label>
+          <input type="date" class="form-control" [(ngModel)]="reportToDate">
+        </div>
+      </div>
+      <div class=" text-center mb-3">
+        <button class="btn btn-outline-primary rounded-5 me-2" (click)="generateReport()">
+          <i class="bi bi-search me-1"></i> Generate
+        </button>
+        <button class="btn btn-outline-secondary  rounded-5" (click)="resetReportFilter()">
+          <i class="bi bi-arrow-repeat me-1"></i> Reset
+        </button>
+      </div>
+
+      <!-- Results Table -->
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+          <tr>
+            <th>Intern</th>
+            <th>Department</th>
+            <th>Field</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Leave</th>
+            <th>Attendance %</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let record of filteredReportData">
+            <td>{{ record.name }}</td>
+            <td>{{ record.department }}</td>
+            <td>{{ record.field }}</td>
+            <td class="text-success">{{ record.present }}</td>
+            <td class="text-danger">{{ record.absent }}</td>
+            <td class="text-warning">{{ record.leave }}</td>
+            <td><span class="badge bg-primary">{{ record.attendanceRate }}%</span></td>
+          </tr>
+          <tr *ngIf="filteredReportData.length === 0">
+            <td colspan="7" class="text-center text-muted">No reports found for the selected filters.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="text-center mt-3">
+        <button class="btn btn-danger rounded-5 me-2" (click)="downloadReportPDF()">
+          <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
+        </button>
+        <button class="btn btn-success rounded-5" (click)="downloadReportExcel()">
+          <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

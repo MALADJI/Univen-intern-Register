@@ -1,0 +1,78 @@
+/* Logo Card Styling */
+.logo-card{
+  background: whitesmoke !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.logo-card:hover{
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.15);
+}
+
+/* Logo Image */
+.logo-img{
+  max-height: 150px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+/* Form Heading */
+.formHeading{
+  color: #26406e !important;
+  letter-spacing: 0.5px;
+}
+
+/* Form Controls */
+.form-control{
+  border-color: rgba(159, 135, 5, 0.3) !important;
+  border-radius: 0.5rem !important;
+  padding: 0.625rem 0.75rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.form-control:focus{
+  border-color: #26406e !important;
+  box-shadow: 0 0 0 0.2rem rgba(38, 64, 110, 0.25);
+}
+.form-control::placeholder {
+  opacity: 0.7 !important;
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* Login Button */
+.loginBtn{
+  background: #26406e !important;
+  color: #ffffff !important;
+  border-radius: 0.5rem !important;
+  padding: 0.625rem 0;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+.loginBtn:hover{
+  background: #1e3354 !important;
+  transform: translateY(-2px);
+}
+
+/* Microsoft Button */
+.microBtn{
+  background-color: rgb(159, 135, 5) !important;
+  color: white !important;
+  border-radius: 0.5rem !important;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+.microBtn:hover{
+  background-color: rgb(140, 120, 0) !important;
+  transform: translateY(-2px);
+}
+
+/* Responsive Adjustments */
+@media(max-width: 768px){
+  .container-fluid{
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .logo-card, .login-card{
+    margin: 0 auto;
+  }
+}
+.form-control{
+  border-color: rgb(89, 114, 172) !important;
+}

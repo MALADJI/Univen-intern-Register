@@ -1,0 +1,170 @@
+.container{
+  margin-top: 80px !important;
+  margin-bottom: 80px !important;
+  padding: 0 !important;
+}
+/* ===================== NAVIGATION ===================== */
+.nav-pills .nav-link {
+  border-radius: 50px;
+  transition: all 0.3s;
+  font-weight: 500;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.95rem;
+}
+.nav-pills .nav-link.active {
+  background: linear-gradient(135deg, #0d6efd, #0a58ca);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ===================== CARDS ===================== */
+.card {
+  border-radius: 1rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* ===================== OVERVIEW STATS ===================== */
+.card.text-center {
+  padding: 2rem 1rem;
+}
+.card.text-center i {
+  font-size: 2.75rem;
+  transition: transform 0.2s;
+}
+.card.text-center i:hover {
+  transform: scale(1.1);
+}
+.card h5 {
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+.card p.fs-4 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0d6efd;
+}
+
+/* ===================== TABLES ===================== */
+.table th, .table td {
+  vertical-align: middle;
+  font-size: 0.95rem;
+}
+.table-hover tbody tr:hover {
+  background-color: rgba(13, 110, 253, 0.07);
+  transition: background-color 0.2s;
+}
+
+/* ===================== BADGES ===================== */
+.badge {
+  font-size: 0.85rem;
+  padding: 0.45em 0.75em;
+  font-weight: 500;
+  border-radius: 12px;
+  transition: transform 0.2s;
+}
+.badge:hover {
+  transform: scale(1.05);
+}
+.badge.bg-success {
+  background-color: #198754 !important;
+}
+.badge.bg-danger {
+  background-color: #dc3545 !important;
+}
+.badge.bg-warning {
+  background-color: #ffc107 !important;
+  color: #212529 !important;
+}
+.badge.bg-secondary {
+  background-color: #6c757d !important;
+}
+
+/* ===================== FORM ELEMENTS ===================== */
+.form-control,
+.form-select {
+  border-radius: 50px;
+  padding: 0.55rem 1rem;
+  font-size: 0.95rem;
+  transition: all 0.25s;
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+input[type="date"] {
+  padding: 0.45rem 0.85rem;
+}
+
+/* ===================== BUTTONS ===================== */
+.btn {
+  border-radius: 50px;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+.btn-outline-primary:hover {
+  background: linear-gradient(135deg, #0d6efd, #0a58ca);
+  color: #fff;
+  transform: translateY(-2px);
+}
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  color: #fff;
+  transform: translateY(-2px);
+}
+.btn-success:hover {
+  background-color: #157347 !important;
+}
+.btn-danger:hover {
+  background-color: #bb2d3b !important;
+}
+
+/* ===================== LEAVE STATUS CARDS ===================== */
+.border-start.border-4 {
+  border-width: 4px !important;
+}
+.card .badge {
+  font-weight: 600;
+}
+
+/* ===================== ALERTS ===================== */
+.alert {
+  border-radius: 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* ===================== SMALL TEXT ===================== */
+.small {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+/* ===================== RESPONSIVE TABLE ===================== */
+.table-responsive {
+  overflow-x: auto;
+}
+
+/* ===================== MISC ===================== */
+.text-primary {
+  color: #0d6efd !important;
+}
+.text-center {
+  text-align: center !important;
+}
+
+
+.admin-info .badge {
+  font-size: 0.8rem;
+  padding: 0.4em 0.7em;
+}
+
+.card .img-fluid.rounded-circle {
+  border: 2px solid #007bff20;
+}

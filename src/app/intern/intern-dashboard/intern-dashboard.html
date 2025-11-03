@@ -1,0 +1,233 @@
+<div class="container py-4">
+  <!-- 🔔 ALERT MESSAGE -->
+  <div id="alertBox" class="alert fade text-center" role="alert">
+    {{ message }}
+  </div>
+
+  <!-- ===== USER CARD ===== -->
+  <div class="card shadow-sm border-0 p-3 d-flex flex-column flex-md-row align-items-center gap-3 mb-3">
+    <div class="logo-container flex-shrink-0">
+      <img src="assets/univen-logo.png" alt="University Logo" class="img-fluid rounded-circle" style="width:60px;height:60px;object-fit:cover;">
+    </div>
+    <div class="intern-info text-center text-md-start">
+      <h5 class="mb-1 fw-bold">{{intern.name}}</h5>
+      <p class="mb-0 text-muted small">{{intern.email}}</p>
+      <span class="badge bg-danger mt-1">{{intern.role}}</span>
+      <span class="badge bg-primary ms-2 mt-1">{{intern.Department}}</span>
+      <span class="badge bg-primary ms-2 mt-1">{{intern.field}}</span>
+
+      <!-- ===== GEOLOCATION INFO ===== -->
+      <div class="mt-2" *ngIf="currentUserCoordinates">
+        <span class="badge bg-info text-dark">Nearest Allowed Location: {{ nearestBuilding }}</span>
+        <span class="badge bg-warning text-dark ms-2" *ngIf="!isWithinAllowedLocation(currentUserCoordinates.lat, currentUserCoordinates.lng)">
+          You are outside allowed locations!
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NAV-PILLS TOP BAR ===== -->
+  <ul class="nav nav-pills flex-wrap justify-content-center mb-4">
+    <li class="nav-item" *ngFor="let item of navItems">
+      <button
+        class="nav-link px-3 py-2 fw-semibold"
+        [ngClass]="{ active: activeSection === item.key }"
+        (click)="showSection(item.key)">
+        <i class="bi me-2" [ngClass]="item.icon"></i>
+        {{ item.label }}
+      </button>
+    </li>
+  </ul>
+
+  <hr class="my-3">
+
+  <!-- ===== SIGNATURE SECTION ===== -->
+  <div *ngIf="activeSection === 'signature'">
+    <div class="card shadow-sm p-3 p-md-4 mb-4">
+      <h4 class="mb-3 text-primary"><i class="bi bi-pencil-square me-2"></i> Digital Signature</h4>
+
+      <!-- Saved Signature Accordion -->
+      <div class="accordion mb-3" id="signatureAccordion">
+        <div class="accordion-item border-0">
+          <h2 class="accordion-header" id="headingSignature">
+            <button class="accordion-button collapsed text-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSignature" aria-expanded="false" aria-controls="collapseSignature">
+              <i class="bi bi-pencil me-2"></i> Saved Signature
+            </button>
+          </h2>
+          <div id="collapseSignature" class="accordion-collapse collapse" aria-labelledby="headingSignature" data-bs-parent="#signatureAccordion">
+            <div class="accordion-body text-center">
+              <ng-container *ngIf="savedSignature; else noSig">
+                <img [src]="savedSignature" alt="Saved Signature" class="img-fluid signature-preview">
+              </ng-container>
+              <ng-template #noSig>
+                <p class="text-muted mt-2">No signature saved yet</p>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Signature Pad Controls -->
+      <div class="d-flex justify-content-center gap-2 mb-3 flex-wrap">
+        <button class="btn btn-outline-primary rounded-5 btn-sm" (click)="toggleSignaturePad()">
+          <i class="bi bi-pencil me-1"></i> {{ isPadVisible ? 'Close Pad' : 'Open Signature Pad' }}
+        </button>
+      </div>
+
+      <!-- Canvas -->
+      <div *ngIf="isPadVisible" class="text-center mb-3">
+        <div class="signature-container position-relative w-100" style="height: 200px;">
+          <canvas #signaturePad class="w-100 h-100 border rounded"></canvas>
+          <span class="placeholder-text position-absolute top-50 start-50 translate-middle text-muted" style="pointer-events: none;">Please Sign here</span>
+        </div>
+        <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+          <button class="btn btn-success btn-sm rounded-5" (click)="saveSignature()">
+            <i class="bi bi-check-circle me-1"></i> Save
+          </button>
+          <button class="btn btn-outline-danger btn-sm rounded-5" (click)="clearSignature()">
+            <i class="bi bi-eraser me-1"></i> Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Sign In/Out Buttons -->
+      <div class="d-flex justify-content-center gap-2 flex-wrap mt-3">
+        <button
+          class="btn btn-success btn-sm rounded-5"
+          (click)="signIn()"
+          [disabled]="signedInToday || !canSignInNow()"
+          [title]="signedInToday ? 'Already signed in today' : !canSignInNow() ? 'Sign in after 08:00' : ''">
+          <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+        </button>
+
+        <button
+          class="btn btn-danger btn-sm rounded-5"
+          (click)="signOut()"
+          [disabled]="!signedInToday || signedOutToday || !canSignOutNow()"
+          [title]="!canSignOutNow() ? 'Sign out after 16:30' : ''">
+          <i class="bi bi-box-arrow-left me-1"></i> Sign Out
+        </button>
+
+        <button *ngIf="signedInToday && !signedOutToday" class="btn btn-warning btn-sm rounded-5" (click)="clearTodayRegister()">
+          <i class="bi bi-trash me-1"></i> Clear Today's Register
+        </button>
+      </div>
+    </div>
+
+    <!-- Attendance Log Table -->
+    <div class="card shadow-sm p-3 p-md-4 mb-4">
+      <h4 class="mb-3"><i class="bi bi-clock-history me-2"></i> Register Table</h4>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle mb-0">
+          <thead class="table-light">
+          <tr>
+            <th>Signature</th>
+            <th>Day</th>
+            <th>Date</th>
+            <th>Location</th>
+            <th>Time In</th>
+            <th>Time Out</th>
+            <th>Status</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let log of weekFilteredLogs | slice:0:5">
+            <td><img [src]="log.image" alt="Signature" class="img-fluid signature-img"></td>
+            <td class="text-center">{{ log.date | date:'EEEE' }}</td>
+            <td class="text-center">{{ log.date | date:'yyyy-MM-dd' }}</td>
+            <td class="text-center">{{ log.location || '-' }}</td>
+            <td class="text-center">{{ log.timeIn ? (log.timeIn | date:'HH:mm') : '-' }}</td>
+            <td class="text-center">{{ log.timeOut ? (log.timeOut | date:'HH:mm') : '-' }}</td>
+            <td class="text-center">
+              <span class="badge" [ngClass]="{'bg-success': log.action === 'Signed In','bg-danger': log.action === 'Signed Out'}">{{ log.action }}</span>
+            </td>
+          </tr>
+          <tr *ngIf="weekFilteredLogs.length === 0">
+            <td colspan="7" class="text-center text-muted">No attendance records for this week (Mon–Fri).</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LEAVE REQUEST SECTION ===== -->
+  <div *ngIf="activeSection === 'leave'">
+    <div class="card shadow-sm p-3 p-md-4 mb-4">
+      <h4><i class="bi bi-calendar-plus me-2"></i> Leave Request</h4>
+      <hr class="mb-4">
+
+      <form (ngSubmit)="submitLeaveRequest()">
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <label class="form-label">Leave Type</label>
+            <select class="form-select" [(ngModel)]="leaveType" name="leaveType">
+              <option value="" disabled selected>Select type</option>
+              <option>Annual Leave</option>
+              <option>Sick Leave</option>
+              <option>Family Responsibility</option>
+              <option>Study Leave</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">Start Date</label>
+            <input type="date" class="form-control" [(ngModel)]="startDate" name="startDate">
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">End Date</label>
+            <input type="date" class="form-control" [(ngModel)]="endDate" name="endDate">
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">Attach Document</label>
+            <input type="file" (change)="onFileSelect($event)" class="form-control" accept=".pdf,.jpg,.png,.doc,.docx">
+          </div>
+        </div>
+
+        <div class="text-end mt-3">
+          <button type="button" class="btn btn-outline-success rounded-5" (click)="submitLeaveRequest()">
+            <i class="bi bi-check-circle me-1"></i> Submit Request
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Leave History Table -->
+    <div class="card shadow-sm p-3 p-md-4 mb-4">
+      <h5><i class="bi bi-clock-history me-2"></i> Leave Request History</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle mb-0">
+          <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Attachment</th>
+            <th>Status</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let leave of leaveRequests">
+            <td>{{ leave.id }}</td>
+            <td>{{ leave.type }}</td>
+            <td>{{ leave.startDate | date }}</td>
+            <td>{{ leave.endDate | date }}</td>
+            <td>{{ leave.attachment }}</td>
+            <td>
+                <span class="badge"
+                      [ngClass]="{
+                        'bg-success': leave.status === 'Approved',
+                        'bg-warning text-dark': leave.status === 'Pending',
+                        'bg-danger': leave.status === 'Declined'
+                      }">{{ leave.status }}</span>
+            </td>
+          </tr>
+          <tr *ngIf="leaveRequests.length === 0">
+            <td colspan="6" class="text-center text-muted">No leave requests found.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

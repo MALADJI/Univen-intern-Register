@@ -1,0 +1,223 @@
+.container{
+  margin-top: 80px !important;
+  margin-bottom: 80px !important;
+  padding: 0 !important;
+}
+
+/* Adjust main content when sidebar is fixed */
+main {
+  margin-top: 50px !important;
+  margin-left: 250px;
+  padding-bottom: 50px;
+  transition: all 0.3s ease;
+}
+
+
+
+
+
+.nav-link:hover {
+  color: #fff;
+  background: rgba(140, 119, 7, 0.62);
+  border-radius: 50px;
+}
+
+.nav-link.active {
+  color: #000;
+  font-weight: 600;
+  background-color: rgba(175, 149, 5, 0.50);
+  border-bottom: 1px solid rgba(6, 49, 73, 0.75);
+  border-radius: 30px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Alerts --- */
+.alert {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  z-index: 1050;
+}
+
+/* --- Cards --- */
+
+
+/* --- Tables --- */
+.table th, .table td {
+  vertical-align: middle;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f1f3f5;
+  transition: 0.2s;
+}
+
+/* --- Containers --- */
+
+
+/* --- Buttons --- */
+.btn-dark, .btn-dark1 {
+  width: 35px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #072a59;
+  color: #fff;
+  border-radius: 50%;
+}
+
+.btn-dark { cursor: none; }
+.btn-dark1 { cursor: pointer; }
+
+.btnClear {
+  color: #fff;
+  background-color: #072a59;
+}
+
+.btnClear:hover {
+  background-color: rgba(140, 119, 7);
+}
+
+.btnSave {
+  color: #fff;
+  background-color: rgba(140, 119, 7);
+}
+
+.btnSave:hover {
+  background-color: #072a59;
+}
+
+/* --- Signature Overlay --- */
+.signature-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.66);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+/* --- Signature Pad Card --- */
+.signature-card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  text-align: center;
+}
+
+.sigImg:hover {
+  color: rgba(140, 119, 7);
+}
+
+.saved-signature-img {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 4px;
+}
+
+/* --- Accordion --- */
+.accordion-button {
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  border-radius: 50px;
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: #e9ecef;
+  color: #0d6efd;
+  box-shadow: none;
+}
+td{
+  text-align: center !important;
+  width: 10%;
+}
+
+.signature-img{
+  height: 100px;        /* increase size */
+  width: auto;
+
+  background-color: transparent;  /* keep transparent */
+  filter: drop-shadow(0 0 1.5px rgba(0, 0, 0, 0.7));  /* subtle shadow for visibility */
+  display: inline-block;
+}
+
+.accordion-body {
+  background-color: #fff;
+  border-radius: 0 0 10px 10px;
+}
+
+/* --- Texts & Labels --- */
+.note { font-style: italic; font-size: 14px; }
+
+label, .option { font-size: 14px; font-weight: 500; }
+
+.badge {
+  font-size: 0.85rem;
+  padding: 0.4em 0.7em;
+  border-radius: 1rem;
+}
+
+/* --- Canvas --- */
+canvas {
+  background: #fff;
+  border-radius: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+}
+
+/* --- Images --- */
+img {
+  max-height: 260px;
+  max-width: 250px;
+  object-fit: contain;
+}
+
+.signature-preview {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  padding: 16px;
+  background-color: unset;
+  image-rendering: crisp-edges;
+}
+
+/* --- Animation --- */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Prevent horizontal overflow --- */
+html, body { overflow-x: hidden; }
+
+.btn-outline-primary {
+  border-color: rgba(140, 119, 7);
+  color: #000;
+}
+
+.btn-outline-primary:hover {
+  color: #fff;
+  background-color: rgba(140, 119, 7);
+  border-color: rgba(140, 119, 7);
+}
+
+.form-control {
+  border-color: rgba(140, 119, 7);
+}

@@ -1,0 +1,111 @@
+<div class="container-fluid d-flex flex-column flex-lg-row justify-content-center align-items-center py-5 min-vh-100 px-3 gap-5">
+
+  <!-- Right Card: Sign-Up Form -->
+  <div class="card col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4 p-md-5 shadow-lg rounded-4 border-0">
+    <h3 class="text-center formHeading fw-semibold mb-5">SIGN UP</h3>
+
+    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+
+      <!-- Name and Surname -->
+      <div class="row mb-3 g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label text-dark fw-medium">First Name</label>
+          <input type="text" formControlName="name" class="form-control" placeholder="Enter your first name">
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label text-dark fw-medium">Surname</label>
+          <input type="text" formControlName="surname" class="form-control" placeholder="Enter your surname">
+        </div>
+      </div>
+
+      <!-- Staff Email with Send Code Button -->
+      <div class="mb-3">
+        <label class="form-label text-dark fw-medium">Staff Email</label>
+        <div class="input-group">
+          <input type="email" formControlName="staffEmail" class="form-control" placeholder="Enter your staff email">
+          <button type="button"
+                  class="btn btn-outline-primary fw-semibold shadow-sm"
+                  (click)="sendCode()"
+                  [disabled]="isCodeSent">
+            Send Code
+          </button>
+        </div>
+        <!-- Countdown next to button -->
+        <div *ngIf="isCodeSent" class="text-muted small mt-1">
+          ({{ countdown }}s)
+        </div>
+      </div>
+
+      <!-- Verification Code -->
+      <div class="mb-3">
+        <label class="form-label text-dark fw-medium">Verification Code</label>
+        <input type="text" formControlName="verificationCode" class="form-control" placeholder="Enter the code sent to your email">
+      </div>
+
+      <!-- Role Selector -->
+      <div class="mb-3">
+        <label class="form-label text-dark fw-medium">User Role</label>
+        <select formControlName="role" class="form-select">
+          <option value="" disabled selected>Select your role</option>
+          <option value="intern">Intern</option>
+          <option value="supervisor">Supervisor</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+
+      <!-- Department Selector -->
+      <div class="mb-4">
+        <label class="form-label text-dark fw-medium">Department</label>
+        <select
+          formControlName="department"
+          class="form-select"
+          (change)="onDepartmentChange()"
+        >
+          <option value="" disabled selected>Select your department</option>
+          <option value="ICT">ICT</option>
+          <option value="HR">HR</option>
+          <option value="Finance">Finance</option>
+          <option value="Marketing">Marketing</option>
+        </select>
+      </div>
+
+      <!-- Field Selector (Visible Only if Department Selected) -->
+      <div class="mb-4" *ngIf="selectedDepartment">
+        <label class="form-label text-dark fw-medium">Field</label>
+        <select
+          formControlName="field"
+          class="form-select"
+          [(ngModel)]="selectedField"
+          (change)="onFieldChange()"
+        >
+          <option value="" disabled selected>Select your field</option>
+          <option *ngFor="let field of availableFields" [value]="field">{{ field }}</option>
+        </select>
+      </div>
+
+
+
+      <!-- Password -->
+      <div class="mb-3">
+        <label class="form-label text-dark fw-medium">Password</label>
+        <input type="password" formControlName="password" class="form-control" placeholder="Create a password">
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="mb-4">
+        <label class="form-label text-dark fw-medium">Confirm Password</label>
+        <input type="password" formControlName="confirmPassword" class="form-control" placeholder="Re-enter your password">
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn loginBtn w-100 fw-bold mb-3 shadow-sm"routerLink="/intern/intern-dashboard">
+        Sign Up
+      </button>
+    </form>
+
+    <p class="text-center mt-1 mb-0 text-secondary">
+      Already have an account?
+      <a routerLink="/admin/admin-dashboard" class="logbtcol fw-semibold text-decoration-none">Login</a>
+    </p>
+  </div>
+</div>
