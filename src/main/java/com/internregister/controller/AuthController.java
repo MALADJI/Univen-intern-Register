@@ -15,6 +15,7 @@ import com.internregister.service.UserService;
 import com.internregister.service.EmailVerificationService;
 import com.internregister.security.PasswordValidator;
 import com.internregister.security.RateLimitingService;
+import com.internregister.service.PasswordResetService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
@@ -38,12 +39,14 @@ public class AuthController {
     private final EmailVerificationService emailVerificationService;
     private final PasswordValidator passwordValidator;
     private final RateLimitingService rateLimitingService;
+    private final PasswordResetService passwordResetService;
 
     public AuthController(UserService userService, JwtTokenProvider jwtTokenProvider, UserRepository userRepository,
                           InternRepository internRepository, AdminRepository adminRepository,
                           DepartmentRepository departmentRepository,
                           SupervisorRepository supervisorRepository, EmailVerificationService emailVerificationService,
-                          PasswordValidator passwordValidator, RateLimitingService rateLimitingService) {
+                          PasswordValidator passwordValidator, RateLimitingService rateLimitingService,
+                          PasswordResetService passwordResetService) {
         this.userService = userService;
         this.jwtTokenProvider = jwtTokenProvider;
         this.userRepository = userRepository;
@@ -54,6 +57,7 @@ public class AuthController {
         this.emailVerificationService = emailVerificationService;
         this.passwordValidator = passwordValidator;
         this.rateLimitingService = rateLimitingService;
+        this.passwordResetService = passwordResetService;
     }
 
     @PostMapping("/login")
@@ -79,18 +83,33 @@ public class AuthController {
             return ResponseEntity.status(400).body(Map.of("error", "Username and password are required"));
         }
         
-        // Find user
+        // Find user - try both username and email
         User user = userService.findByUsername(username.trim()).orElse(null);
+        
+        // If not found by username, try to find by email
+        if (user == null) {
+            user = userRepository.findByEmail(username.trim()).orElse(null);
+        }
+        
         if (user == null) {
             System.out.println("✗ Login attempt failed: User not found - " + username.trim());
+            System.out.println("  Searched for username/email: " + username.trim());
             rateLimitingService.recordFailedAttempt(clientIp);
             return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
         }
+        
+        System.out.println("✓ User found:");
+        System.out.println("  Username: " + user.getUsername());
+        System.out.println("  Email: " + user.getEmail());
+        System.out.println("  Role: " + user.getRole());
+        System.out.println("  Stored password hash: " + (user.getPassword() != null ? user.getPassword().substring(0, Math.min(20, user.getPassword().length())) + "..." : "null"));
         
         // Verify password - CRITICAL: This must always be checked
         boolean passwordValid = userService.checkPassword(password, user.getPassword());
         if (!passwordValid) {
             System.out.println("✗ Login attempt failed: Invalid password for user - " + username.trim());
+            System.out.println("  Password provided: " + (password != null ? "***" + password.length() + " chars" : "null"));
+            System.out.println("  Password verification result: " + passwordValid);
             rateLimitingService.recordFailedAttempt(clientIp);
             return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
         }
@@ -180,6 +199,41 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Email is required"));
+        }
+        try {
+            String token = passwordResetService.createResetToken(email.trim());
+            return ResponseEntity.ok(Map.of("message", "Password reset token generated", "token", token));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
+        String token = body.get("token");
+        String newPassword = body.get("newPassword");
+        if (token == null || token.isBlank() || newPassword == null || newPassword.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Token and newPassword are required"));
+        }
+        var validation = passwordValidator.validate(newPassword);
+        if (!validation.isValid()) {
+            return ResponseEntity.badRequest().body(Map.of("error", validation.getErrorMessage()));
+        }
+        try {
+            passwordResetService.resetPassword(token, newPassword);
+            return ResponseEntity.ok(Map.of("message", "Password reset successful"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String,String> request) {
         try {
@@ -232,17 +286,20 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(Map.of("error", "Invalid role. Must be ADMIN, SUPERVISOR, or INTERN"));
             }
             
+            // Check if user already exists by username or email
+            if (userRepository.findByUsername(email.trim()).isPresent() || 
+                userRepository.findByEmail(email.trim()).isPresent()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Username or email already exists"));
+            }
+            
             User user = new User();
             user.setUsername(email.trim());
             user.setEmail(email.trim());
-            user.setPassword(password);
+            user.setPassword(password); // Will be hashed in saveUser()
             user.setRole(role);
             
-            if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Username already exists"));
-            }
-            
             User savedUser = userService.saveUser(user);
+            System.out.println("✓ Password hashed and saved for user: " + savedUser.getUsername());
             System.out.println("✓ New user registered and saved to database:");
             System.out.println("  Username: " + savedUser.getUsername());
             System.out.println("  Role: " + savedUser.getRole());

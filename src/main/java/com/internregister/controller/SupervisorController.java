@@ -2,9 +2,11 @@ package com.internregister.controller;
 
 import com.internregister.entity.Supervisor;
 import com.internregister.service.SupervisorService;
+import com.internregister.dto.SupervisorRequest;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/supervisors")
@@ -23,17 +25,39 @@ public class SupervisorController {
     }
 
     @GetMapping("/{id}")
-    public Optional<Supervisor> getSupervisorById(@PathVariable Long id) {
-        return supervisorService.getSupervisorById(id);
+    public ResponseEntity<Supervisor> getSupervisorById(@PathVariable Long id) {
+        return supervisorService.getSupervisorById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Supervisor createSupervisor(@RequestBody Supervisor supervisor) {
-        return supervisorService.saveSupervisor(supervisor);
+    public ResponseEntity<?> createSupervisor(@Valid @RequestBody SupervisorRequest request) {
+        try {
+            Supervisor supervisor = supervisorService.createSupervisor(request);
+            return ResponseEntity.ok(supervisor);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateSupervisor(@PathVariable Long id, @Valid @RequestBody SupervisorRequest request) {
+        try {
+            Supervisor supervisor = supervisorService.updateSupervisor(id, request);
+            return ResponseEntity.ok(supervisor);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteSupervisor(@PathVariable Long id) {
-        supervisorService.deleteSupervisor(id);
+    public ResponseEntity<?> deleteSupervisor(@PathVariable Long id) {
+        try {
+            supervisorService.deleteSupervisor(id);
+            return ResponseEntity.ok().body(java.util.Map.of("message", "Supervisor deleted successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
     }
 }

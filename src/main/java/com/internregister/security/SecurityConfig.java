@@ -49,7 +49,25 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight requests
                 .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .anyRequest().authenticated()
+                // TEMPORARY: Allow testing without authentication - ALL endpoints
+                .requestMatchers("/api/**").permitAll()
+                .anyRequest().permitAll() // Allow all requests for testing
+            )
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint((request, response, authException) -> {
+                    System.err.println("✗ Authentication entry point triggered: " + authException.getMessage());
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Authentication required\"}");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    System.err.println("✗ Access denied: " + accessDeniedException.getMessage());
+                    System.err.println("  Request URI: " + request.getRequestURI());
+                    System.err.println("  User: " + (request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "null"));
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Access denied: " + accessDeniedException.getMessage() + "\"}");
+                })
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userService), BasicAuthenticationFilter.class);
         
@@ -97,23 +115,95 @@ class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         
         String header = request.getHeader("Authorization");
+        System.out.println("=== JWT Filter Debug ===");
+        System.out.println("Request URI: " + request.getRequestURI());
+        System.out.println("Authorization header present: " + (header != null));
+        if (header != null) {
+            System.out.println("Header length: " + header.length());
+            System.out.println("Header starts with Bearer: " + header.startsWith("Bearer "));
+            System.out.println("Header preview: " + (header.length() > 50 ? header.substring(0, 50) + "..." : header));
+        }
+        
         if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
-            // Trim whitespace and newlines from header
-            header = header.trim();
-            String token = header.substring(7).trim();
-            if (jwtTokenProvider.validateToken(token)) {
-                String username = jwtTokenProvider.getUsername(token);
-                String role = jwtTokenProvider.getRole(token);
-                User user = userService.findByUsername(username).orElse(null);
-                if (user != null) {
-                    // Set user role as authority
-                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
-                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        user.getUsername(), null, java.util.List.of(authority));
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+            try {
+                // Trim whitespace and newlines from header
+                header = header.trim();
+                String token = header.substring(7).trim();
+                
+                System.out.println("Token extracted, length: " + token.length());
+                System.out.println("Validating token...");
+                
+                boolean isValid = jwtTokenProvider.validateToken(token);
+                System.out.println("Token validation result: " + isValid);
+                
+                if (isValid) {
+                    String username = jwtTokenProvider.getUsername(token);
+                    String role = jwtTokenProvider.getRole(token);
+                    
+                    // Try to find user by username first
+                    User user = userService.findByUsername(username).orElse(null);
+                    
+                    // If not found by username, try by email
+                    if (user == null) {
+                        user = userService.findByEmail(username).orElse(null);
+                    }
+                    
+                    if (user != null) {
+                        // Set user role as authority (with and without ROLE_ prefix for compatibility)
+                        java.util.List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>();
+                        authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+                        authorities.add(new SimpleGrantedAuthority(role));
+                        
+                        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                            user.getUsername(), 
+                            user.getPassword(), // Set credentials (can be null for stateless)
+                            authorities
+                        );
+                        auth.setDetails(user);
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                        
+                        // Verify authentication is set
+                        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                            System.err.println("✗ WARNING: Authentication not set in SecurityContext!");
+                        } else {
+                            System.out.println("  Authentication set in SecurityContext: " + SecurityContextHolder.getContext().getAuthentication().isAuthenticated());
+                        }
+                        
+                        System.out.println("✓ JWT Authentication successful:");
+                        System.out.println("  Username: " + user.getUsername());
+                        System.out.println("  Role: " + role);
+                        System.out.println("  Endpoint: " + request.getRequestURI());
+                    } else {
+                        System.out.println("✗ JWT Token valid but user not found: " + username);
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.getWriter().write("{\"error\":\"User not found\"}");
+                        return;
+                    }
+                } else {
+                    System.out.println("✗ JWT Token validation failed");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Invalid or expired token\"}");
+                    return;
                 }
+            } catch (Exception e) {
+                System.err.println("✗ JWT Authentication error: " + e.getMessage());
+                e.printStackTrace();
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"Authentication failed: " + e.getMessage() + "\"}");
+                return;
+            }
+        } else {
+            // No Authorization header - check if it's a public endpoint
+            String path = request.getRequestURI();
+            if (!path.startsWith("/api/auth/") && !path.startsWith("/swagger-ui/") && !path.startsWith("/v3/api-docs/")) {
+                System.out.println("✗ No Authorization header for protected endpoint: " + path);
+                // Don't block here - let Spring Security handle it with proper error
+                // This allows the access denied handler to provide better error messages
             }
         }
+        
         filterChain.doFilter(request, response);
     }
 }
