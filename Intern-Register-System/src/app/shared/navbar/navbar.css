@@ -1,0 +1,88 @@
+/* Navbar custom styles */
+.navbar {
+  background: linear-gradient(90deg, #021735, #26406e);
+}
+
+.navbar-brand {
+  font-weight: 500 !important;
+  font-size: 18px;
+  color: #fff !important;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 200ms ease-in-out;
+}
+
+.navbar-brand:hover {
+  color: rgba(255, 255, 255, 0.60) !important;
+}
+
+.navbar-nav .nav-item {
+  margin-left: 10px;
+}
+
+.navbar-nav .nav-link {
+  position: relative;
+  color: white; /* default color */
+  text-decoration: none; /* remove default underline */
+  padding-bottom: 5px; /* space for underline */
+  transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0; /* aligns underline to bottom */
+  width: 0;
+  height: 3px; /* thickness of underline */
+  background-color: rgb(175, 149, 5); /* your gold color */
+  transition: width 0.3s ease;
+  border-radius: 5px; /* gives it a smooth object-like look */
+}
+
+.navbar-nav .nav-link:hover {
+  color: rgb(255, 255, 255) !important; /* text hover color */
+}
+
+.navbar-nav .nav-link:hover::after {
+  width: 100%; /* underline expands */
+}
+
+.nav-link i {
+  font-size: 16px !important;
+  vertical-align: middle;
+}
+
+.nav-link a{
+  font-size: 18px !important;
+}
+
+.clock{
+  background: rgb(159, 135, 5) !important;
+  color: #ffffff !important;
+}
+
+/* Fullscreen dark overlay */
+.profile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050; /* higher than navbar */
+}
+
+/* Profile card */
+.profile-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 400px; /* professional size */
+  max-width: 90%;
+  animation: fadeInDown 0.3s ease-in-out;
+}

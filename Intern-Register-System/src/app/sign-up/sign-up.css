@@ -1,0 +1,40 @@
+
+.custome-shadow{
+  box-shadow: 0 4px 6px rgba(0, 123, 180, 0.6);
+}
+
+.logo-card{
+  background: whitesmoke !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.logo-card:hover{
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.15);
+}
+
+/* Logo Image */
+.logo-img{
+  max-height: 150px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+:host {
+ display: block;
+ background-color: #fdf8f4;
+}
+
+.loginBtn{
+  color: white;
+  background-color: #303f61;
+}
+
+.form-select{
+  border-color: rgb(89, 114, 172) !important;
+}
+.form-control{
+  border-color: rgb(89, 114, 172) !important;
+}
+.btn-outline-primary:hover{
+  background-color: #303f61;
+ border-color: #303f61;
+}

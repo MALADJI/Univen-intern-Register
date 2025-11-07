@@ -1,0 +1,15 @@
+body{
+  background-color: whitesmoke !important;
+  scroll-behavior: smooth !important;
+
+}
+.card {
+  border-radius: 20px !important;
+}
+
+.table th, .table td {
+  vertical-align: middle;
+}
+.ping{
+
+}
