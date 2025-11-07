@@ -1,0 +1,923 @@
+<!-- ==================== ADMIN DASHBOARD ==================== -->
+<div class="container py-4">
+
+  <!-- ===== 👤 ADMIN USER CARD ===== -->
+  <div class="card shadow-sm border-0 p-3 d-flex flex-column flex-md-row align-items-center gap-3 mb-4">
+    <div class="logo-container flex-shrink-0">
+      <img src="assets/univen-logo.png" alt="University Logo"
+           class="img-fluid rounded-circle"
+           style="width: 60px; height: 60px; object-fit: cover;">
+    </div>
+    <div class="admin-info text-center text-md-start">
+      <h5 class="mb-1 fw-bold">{{ admin?.name }}</h5>
+      <p class="mb-0 ms-2 text-muted small">{{ admin?.email }}</p>
+      <span class="badge bg-danger mt-1">{{ admin?.role }}</span>
+      <span class="badge bg-primary ms-2 mt-1">{{ admin?.Department }}</span>
+    </div>
+  </div>
+
+  <!-- ===== NAVIGATION ===== -->
+  <ul class="nav nav-pills flex-wrap justify-content-center mb-4">
+    <li class="nav-item" *ngFor="let section of sections">
+      <button
+        class="nav-link px-3 py-2 fw-semibold"
+        [ngClass]="{ active: activeSection === section }"
+        (click)="showSection(section)">
+        {{ section }}
+      </button>
+    </li>
+  </ul>
+
+  <!-- ===================== OVERVIEW SECTION ===================== -->
+  <div *ngIf="activeSection === 'overview'">
+
+    <!-- ===== OVERVIEW CARDS ===== -->
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3" *ngFor="let stat of overviewStats">
+        <div
+          class="card shadow-sm border-0 rounded-4 text-center py-4 h-100 hover-pointer"
+          (click)="openModal(stat)"
+          style="cursor: pointer;">
+          <div class="text-{{ stat.color }} fs-2 mb-2">
+            <i [class]="stat.icon"></i>
+          </div>
+          <h5 class="fw-semibold">{{ stat.label }}</h5>
+          <p class="fs-4 fw-bold mb-0">{{ stat.value }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ADMIN MODAL ===== -->
+    <div class="modal fade" id="adminModal" tabindex="-1" aria-labelledby="adminModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="adminModalLabel">
+              <i class="bi bi-person-badge-fill me-2"></i>{{ selectedStat?.label }}
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+
+          <!-- ===== MODAL BODY ===== -->
+          <div class="modal-body bg-light py-4">
+
+            <!-- ===== DEFAULT VIEW ===== -->
+            <div *ngIf="selectedStat?.label !== 'Absent' && selectedStat?.label !== 'On Leave'&& selectedStat?.label !== 'Present Today'; else leaveOrAbsentTable" class="text-center">
+              <div class="fs-1 text-{{ selectedStat?.color }}">
+                <i [class]="selectedStat?.icon"></i>
+              </div>
+              <h4 class="fw-bold mt-3">{{ selectedStat?.label }}</h4>
+              <p class="display-6 fw-bold text-{{ selectedStat?.color }}">{{ selectedStat?.value }}</p>
+            </div>
+
+            <!-- ================= LEAVE / ABSENT / PRESENT MODAL ================= -->
+
+
+            <ng-template #leaveOrAbsentTable>
+
+              <!-- On Leave Section -->
+              <ng-container *ngIf="selectedStat?.label === 'On Leave'">
+                <ng-container *ngTemplateOutlet="onLeaveTemplate"></ng-container>
+              </ng-container>
+
+              <!-- Absent Section -->
+              <ng-container *ngIf="selectedStat?.label === 'Absent'">
+                <ng-container *ngTemplateOutlet="absentTemplate"></ng-container>
+              </ng-container>
+
+              <!-- Present Today Section -->
+              <ng-container *ngIf="selectedStat?.label === 'Present Today'">
+                <ng-container *ngTemplateOutlet="presentTemplate"></ng-container>
+              </ng-container>
+
+            </ng-template>
+
+            <!-- ================= ON LEAVE TEMPLATE ================= -->
+            <ng-template #onLeaveTemplate>
+              <div class="card shadow-sm border-0 rounded-4 p-3">
+                <h5 class="text-primary fw-bold mb-3">
+                  <i class="bi bi-calendar-check me-2"></i>Recent Leave Requests
+                </h5>
+
+                <!-- Filters -->
+                <div class="row g-3 align-items-end mb-3">
+                  <div class="col-12 col-md-4">
+                    <label class="form-label fw-medium">Intern Name</label>
+                    <input type="text" class="form-control" placeholder="Search by name..." [(ngModel)]="filterName" />
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label fw-medium">Department</label>
+                    <select class="form-select" [(ngModel)]="filterDepartment"
+                            (change)="filteredFields = filterDepartment ? fieldMap[filterDepartment] : []; filterField = ''; currentPage = 1">
+                      <option value="">All</option>
+                      <option *ngFor="let dept of departmentList" [value]="dept">{{ dept }}</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label fw-medium">Field</label>
+                    <select class="form-select" [(ngModel)]="filterField" (change)="currentPage = 1">
+                      <option value="">All</option>
+                      <option *ngFor="let field of filteredFields" [value]="field">{{ field }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle text-center">
+                    <thead class="table-light">
+                    <tr>
+                      <th>Intern</th>
+                      <th>Department</th>
+                      <th>Field</th>
+                      <th>Start Date</th>
+                      <th>End Date</th>
+                      <th>Reason</th>
+                      <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let leave of paginatedLeaves">
+                      <td>{{ leave.name }}</td>
+                      <td>{{ leave.department }}</td>
+                      <td>{{ leave.field }}</td>
+                      <td>{{ leave.startDate }}</td>
+                      <td>{{ leave.endDate }}</td>
+                      <td>{{ leave.reason }}</td>
+                      <td>
+              <span class="badge rounded-pill"
+                    [ngClass]="{
+                      'bg-success': leave.status === 'Approved',
+                      'bg-warning text-dark': leave.status === 'Pending',
+                      'bg-danger': leave.status === 'Declined'
+                    }">{{ leave.status }}</span>
+                      </td>
+                    </tr>
+                    <tr *ngIf="paginatedLeaves.length === 0">
+                      <td colspan="7" class="text-muted text-center">No leave records found.</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                  <button class="btn btn-outline-primary rounded-5" [disabled]="currentPage === 1" (click)="prevPage()">
+                    <i class="bi bi-arrow-left-circle me-1"></i> Previous
+                  </button>
+                  <span class="fw-semibold text-muted">Page {{ currentPage }} of {{ totalPages }}</span>
+                  <button class="btn btn-outline-primary rounded-5" [disabled]="currentPage === totalPages" (click)="nextPage()">
+                    Next <i class="bi bi-arrow-right-circle ms-1"></i>
+                  </button>
+                </div>
+              </div>
+            </ng-template>
+
+            <!-- ================= ABSENT TEMPLATE ================= -->
+            <ng-template #absentTemplate>
+              <div class="card shadow-sm border-0 rounded-4 p-3">
+                <h5 class="text-danger fw-bold mb-3">
+                  <i class="bi bi-graph-down me-2"></i>Intern Attendance Summary
+                </h5>
+
+                <!-- Filters -->
+                <div class="row g-3 align-items-end mb-3">
+                  <div class="col-12 col-md-4">
+                    <label class="form-label fw-medium">Intern Name</label>
+                    <input type="text" class="form-control" placeholder="Search by name..." [(ngModel)]="attendanceFilterName" />
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label fw-medium">Department</label>
+                    <select class="form-select" [(ngModel)]="attendanceFilterDepartment" (change)="updateAttendanceFields()">
+                      <option value="">All</option>
+                      <option *ngFor="let dept of departmentList" [value]="dept">{{ dept }}</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label fw-medium">Field</label>
+                    <select class="form-select" [(ngModel)]="attendanceFilterField">
+                      <option value="">All</option>
+                      <option *ngFor="let field of filteredAttendanceFields" [value]="field">{{ field }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle text-center">
+                    <thead class="table-light">
+                    <tr>
+                      <th>Intern</th>
+                      <th>Department</th>
+                      <th>Field</th>
+                      <th>Absent</th>
+                      <th>Attendance %</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let data of paginatedAttendance">
+                      <td>{{ data.name }}</td>
+                      <td>{{ data.department }}</td>
+                      <td>{{ data.field }}</td>
+                      <td class="text-danger fw-semibold">{{ data.absent }}</td>
+                      <td><span class="badge bg-primary">{{ data.attendanceRate }}%</span></td>
+                    </tr>
+                    <tr *ngIf="paginatedAttendance.length === 0">
+                      <td colspan="7" class="text-center text-muted">No attendance records found.</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                  <button class="btn btn-outline-primary rounded-5" [disabled]="attendancePage === 1" (click)="prevAttendancePage()">
+                    <i class="bi bi-arrow-left-circle me-1"></i> Previous
+                  </button>
+                  <span class="fw-semibold text-muted">Page {{ attendancePage }} of {{ totalAttendancePages }}</span>
+                  <button class="btn btn-outline-primary rounded-5" [disabled]="attendancePage === totalAttendancePages" (click)="nextAttendancePage()">
+                    Next <i class="bi bi-arrow-right-circle ms-1"></i>
+                  </button>
+                </div>
+              </div>
+            </ng-template>
+
+            <!-- ================= PRESENT TODAY TEMPLATE ================= -->
+            <ng-template #presentTemplate>
+              <div class="card shadow-sm border-0 rounded-4 p-3">
+                <h5 class="text-success fw-bold mb-3">
+                  <i class="bi bi-graph-up-arrow me-2"></i>Present Interns Today
+                </h5>
+
+                <!-- Filters -->
+                <div class="row g-3 align-items-end mb-3">
+                  <div class="col-12 col-md-4">
+                    <label class="form-label fw-medium">Intern Name</label>
+                    <input type="text" class="form-control" placeholder="Search by name..." [(ngModel)]="presentFilterName" />
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label fw-medium">Department</label>
+                    <select class="form-select" [(ngModel)]="presentFilterDepartment" (change)="updatePresentFields()">
+                      <option value="">All Departments</option>
+                      <option *ngFor="let dept of departmentList" [value]="dept">{{ dept }}</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label fw-medium">Field</label>
+                    <select class="form-select" [(ngModel)]="presentFilterField">
+                      <option value="">All Fields</option>
+                      <option *ngFor="let field of filteredPresentFields" [value]="field">{{ field }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle text-center">
+                    <thead class="table-light">
+                    <tr>
+                      <th>Name</th>
+                      <th>Department</th>
+                      <th>Field</th>
+                      <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let intern of paginatedPresentInterns">
+                      <td>{{ intern.name }}</td>
+                      <td>{{ intern.department }}</td>
+                      <td>{{ intern.field }}</td>
+                      <td>
+                        <span class="badge rounded-pill bg-success" *ngIf="intern.status === 'Present'">Present</span>
+                      </td>
+                    </tr>
+                    <tr *ngIf="paginatedPresentInterns.length === 0">
+                      <td colspan="4" class="text-muted text-center">No interns found.</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <button class="btn btn-outline-primary rounded-5" [disabled]="presentPage === 1" (click)="prevPresentPage()">
+                    <i class="bi bi-arrow-left-circle me-1"></i> Previous
+                  </button>
+                  <span class="fw-semibold text-muted">Page {{ presentPage }} of {{ totalPresentPages }}</span>
+                  <button class="btn btn-outline-primary rounded-5" [disabled]="presentPage === totalPresentPages" (click)="nextPresentPage()">
+                    Next <i class="bi bi-arrow-right-circle ms-1"></i>
+                  </button>
+                </div>
+              </div>
+            </ng-template>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== ATTENDANCE SUMMARY ===================== -->
+    <div class="card shadow-sm p-3 p-md-4 mb-4 rounded-4">
+      <h5 class="text-primary fw-bold mb-3">
+        <i class="bi bi-graph-up me-2"></i>Intern Attendance Summary
+      </h5>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle text-center">
+          <thead class="table-light">
+          <tr>
+            <th>Intern</th>
+            <th>Department</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>On Leave</th>
+            <th>Attendance %</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let data of overviewAttendance">
+            <td>{{ data.name }}</td>
+            <td>{{ data.department }}</td>
+            <td class="text-success fw-semibold">{{ data.present }}</td>
+            <td class="text-danger fw-semibold">{{ data.absent }}</td>
+            <td class="text-warning fw-semibold">{{ data.leave }}</td>
+            <td>
+              <span class="badge bg-primary">{{ data.attendanceRate }}%</span>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===================== LEAVE OVERVIEW ===================== -->
+    <div class="card shadow-sm p-3 p-md-4 mb-4 rounded-4">
+      <h5 class="text-primary fw-bold mb-3">
+        <i class="bi bi-calendar-check me-2"></i>Recent Leave Requests
+      </h5>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle text-center">
+          <thead class="table-light">
+          <tr>
+            <th>Intern</th>
+            <th>Department</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Reason</th>
+            <th>Status</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let leave of overviewLeaves">
+            <td>{{ leave.name }}</td>
+            <td>{{ leave.department }}</td>
+            <td>{{ leave.startDate }}</td>
+            <td>{{ leave.endDate }}</td>
+            <td>{{ leave.reason }}</td>
+            <td>
+            <span class="badge rounded-pill"
+                  [ngClass]="{
+                    'bg-success': leave.status === 'Approved',
+                    'bg-warning text-dark': leave.status === 'Pending',
+                    'bg-danger': leave.status === 'Declined'
+                  }">{{ leave.status }}
+            </span>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===================== Manage Departments SECTION ===================== -->
+  <div *ngIf="activeSection === Section.Departments">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4>Manage Departments</h4>
+      <button class="btn btn-primary btn-sm" (click)="openAddDepartmentModal()">
+        <i class="bi bi-plus-circle"></i> Add Department
+      </button>
+    </div>
+
+    <div *ngIf="departmentList.length === 0" class="alert alert-info">
+      No departments added yet.
+    </div>
+
+    <div *ngFor="let dept of departmentList; let i = index" class="card mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>{{ dept }}</strong>
+        <div>
+          <button class="btn btn-sm btn-warning me-1" (click)="editDepartment(dept, i)">
+            <i class="bi bi-pencil-square"></i> Edit
+          </button>
+          <button class="btn btn-sm btn-danger" (click)="deleteDepartment(dept, i)">
+            <i class="bi bi-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span><strong>Fields:</strong></span>
+          <button class="btn btn-sm btn-primary" (click)="openAddFieldModal(dept)">
+            <i class="bi bi-plus-circle"></i> Add Field
+          </button>
+        </div>
+
+        <div *ngIf="fieldMap[dept]?.length === 0" class="text-muted mb-2">
+          No fields added yet.
+        </div>
+
+        <ul class="list-group">
+          <li *ngFor="let field of fieldMap[dept]; let j = index" class="list-group-item d-flex justify-content-between align-items-center">
+            {{ field }}
+            <div>
+              <button class="btn btn-sm btn-warning me-1" (click)="editField(dept, j)">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="deleteField(dept, j)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SUPERVISORS SECTION ===================== -->
+  <div *ngIf="activeSection === 'Supervisor'">
+    <div class="card shadow-sm p-3 p-md-4 mb-4 rounded-4">
+
+      <!-- Section Header + Search -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
+        <h4 class="text-primary fw-bold mb-2 mb-md-0">
+          <i class="bi bi-person-badge-fill me-2"></i>Supervisors
+        </h4>
+        <input
+          type="text"
+          [(ngModel)]="supervisorSearch"
+          placeholder="Search supervisors..."
+          class="form-control w-50 w-md-auto"
+          (input)="updateFilteredSupervisors()"/>
+
+
+
+      </div>
+
+      <!-- Filters Row -->
+      <div class="row g-3 mb-3">
+        <div class="col-12 col-md-6 col-lg-3">
+          <label class="form-label fw-medium">Department</label>
+          <select
+            class="form-select"
+            [(ngModel)]="supervisorFilterDepartment"
+            (change)="updateFilteredSupervisors()">
+            <option value="">All</option>
+            <option *ngFor="let dept of departmentList" [value]="dept">{{ dept }}</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+
+          <label class="form-label fw-medium">Field</label>
+          <select
+            class="form-select"
+            [(ngModel)]="supervisorFilterField"
+            (change)="updateFilteredSupervisors()">
+            <option value="">All</option>
+            <option *ngFor="let field of filteredFieldsForSupervisors" [value]="field">{{ field }}</option>
+          </select>
+
+        </div>
+
+
+      </div>
+
+      <!-- Supervisors Table -->
+      <div class="table-responsive">
+        <table class="table table-hover align-middle text-center">
+          <thead class="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Department</th>
+            <th>Field</th>
+            <th>Assigned Interns</th>
+            <th>Status</th>
+            <th class="text-center">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let supervisor of paginatedSupervisors; let i = index">
+            <td>{{ supervisor.name }}</td>
+            <td>{{ supervisor.email }}</td>
+            <td>{{ supervisor.department }}</td>
+            <td>{{ supervisor.field }}</td>
+            <td>{{ supervisor.assignedInterns?.length || 0 }}</td>
+            <td>
+              <span
+                class="badge rounded-pill"
+                [ngClass]="{
+                  'bg-success': supervisor.status === 'Active',
+                  'bg-warning text-dark': supervisor.status === 'On Leave',
+                  'bg-danger': supervisor.status === 'Inactive'
+                }">
+                {{ supervisor.status }}
+              </span>
+            </td>
+            <td class="text-center">
+              <div class="d-flex flex-wrap justify-content-center gap-1">
+                <button class="btn btn-sm btn-outline-primary rounded-5" (click)="openEditSupervisorModal(i)">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger rounded-5" (click)="removeSupervisor(i)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="paginatedSupervisors.length === 0">
+            <td colspan="7" class="text-center text-muted">No supervisors found.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div class="d-flex justify-content-between align-items-center mt-2">
+        <button
+          class="btn btn-outline-primary rounded-5"
+          [disabled]="supervisorPage === 1"
+          (click)="prevSupervisorPage()">
+          <i class="bi bi-arrow-left-circle me-1"></i> Previous
+        </button>
+        <span class="fw-semibold text-muted">Page {{ supervisorPage }} of {{ totalSupervisorPages }}</span>
+        <button
+          class="btn btn-outline-primary rounded-5"
+          [disabled]="supervisorPage === totalSupervisorPages"
+          (click)="nextSupervisorPage()">
+          Next <i class="bi bi-arrow-right-circle ms-1"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ===================== INTERNS SECTION ===================== -->
+  <div *ngIf="activeSection === 'interns'">
+    <div class="card shadow-sm p-3 p-md-4 mb-4 rounded-4">
+
+      <!-- Section Header + Search -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
+        <h4 class="text-primary fw-bold mb-2 mb-md-0">
+          <i class="bi bi-people-fill me-2"></i>Interns
+        </h4>
+        <input type="text" [(ngModel)]="internSearch" placeholder="Search interns..." class="form-control w-100 w-md-auto" (input)="updateFilteredInterns()" />
+      </div>
+
+      <!-- Filters Row -->
+      <div class="row g-3 mb-3">
+        <div class="col-12 col-md-6 col-lg-3">
+          <label class="form-label fw-medium">Department</label>
+          <select class="form-select" [(ngModel)]="internFilterDepartment" (change)="updateFilteredInterns()">
+            <option value="">All</option>
+            <option *ngFor="let dept of departmentList" [value]="dept">{{ dept }}</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <label class="form-label fw-medium">Field</label>
+          <select class="form-select" [(ngModel)]="internFilterField" (change)="updateFilteredInterns()">
+            <option value="">All</option>
+            <option *ngFor="let field of filteredFieldsForInterns" [value]="field">{{ field }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Interns Table -->
+      <div class="table-responsive">
+        <table class="table table-hover align-middle text-center">
+          <thead class="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Supervisor</th>
+            <th>Department</th>
+            <th>Field</th>
+            <th>Status</th>
+            <th class="text-center">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let intern of paginatedInterns; let i = index">
+            <td>{{ intern.name }}</td>
+            <td>{{ intern.email }}</td>
+            <td>{{ intern.supervisor }}</td>
+            <td>{{ intern.department }}</td>
+            <td>{{ intern.field }}</td>
+            <td>
+              <span class="badge rounded-pill"
+                    [ngClass]="{
+                      'bg-success': intern.status === 'Present',
+                      'bg-warning text-dark': intern.status === 'On Leave',
+                      'bg-danger': intern.status === 'Absent'
+                    }">{{ intern.status }}
+              </span>
+            </td>
+            <td class="text-center">
+              <div class="d-flex flex-wrap justify-content-center gap-1">
+                <button class="btn btn-sm btn-outline-primary rounded-5" (click)="openEditModal(i)">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger rounded-5" (click)="removeIntern(i)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div class="d-flex justify-content-between align-items-center mt-2">
+        <button class="btn btn-outline-primary rounded-5" [disabled]="internPage === 1" (click)="prevInternPage()">
+          <i class="bi bi-arrow-left-circle me-1"></i> Previous
+        </button>
+        <span class="fw-semibold text-muted">Page {{ internPage }} of {{ totalInternPages }}</span>
+        <button class="btn btn-outline-primary rounded-5" [disabled]="internPage === totalInternPages" (click)="nextInternPage()">
+          Next <i class="bi bi-arrow-right-circle ms-1"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ===================== LEAVE STATUS SECTION (Colored Table + Matching Badge) ===================== -->
+  <div *ngIf="activeSection === 'Intern Leave status'">
+    <h4 class="mb-4 fw-bold text-primary text-center">Intern Leave Requests</h4>
+
+    <!-- Undo Cleared Requests Button -->
+    <div *ngIf="clearedLeaveRequests.length > 0" class="mb-3 text-center">
+      <button class="btn btn-warning rounded-5" (click)="undoClear()">
+        <i class="bi bi-arrow-counterclockwise me-1"></i>Undo Cleared Requests
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="row g-3 align-items-end mb-3">
+      <div class="col-12 col-md-4">
+        <label class="form-label fw-medium">Intern Name</label>
+        <input type="text" class="form-control" placeholder="Search by name..." [(ngModel)]="leaveFilterName" (input)="currentPage=1" />
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label fw-medium">Department</label>
+        <select class="form-select" [(ngModel)]="leaveFilterDepartment" (change)="updateLeaveFields(); currentPage=1">
+          <option value="">All</option>
+          <option *ngFor="let dept of departmentList" [value]="dept">{{ dept }}</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label fw-medium">Field</label>
+        <select class="form-select" [(ngModel)]="leaveFilterField" (change)="currentPage=1">
+          <option value="">All</option>
+          <option *ngFor="let field of filteredLeaveFields" [value]="field">{{ field }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Leave Requests Table -->
+    <div class="table-responsive">
+      <table class="table table-hover align-middle text-center">
+        <thead class="table-light">
+        <tr>
+          <th>Intern</th>
+          <th>Email</th>
+          <th>Department</th>
+          <th>Field</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Reason</th>
+          <th>Status</th>
+          <th>Documents</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let request of paginatedLeaveRequests; let i = index"
+            [ngClass]="{
+              'table-success': request.status === 'Approved',
+              'table-warning': request.status === 'Pending',
+              'table-danger': request.status === 'Declined'
+            }">
+          <td>{{ request.name }}</td>
+          <td>{{ request.email }}</td>
+          <td>{{ request.department }}</td>
+          <td>{{ request.field }}</td>
+          <td>{{ request.startDate }}</td>
+          <td>{{ request.endDate }}</td>
+          <td>{{ request.reason }}</td>
+          <td>   <a *ngIf="request.document" [href]="request.document" target="_blank" class="btn btn-info btn-sm rounded-5">
+            <i class="bi bi-paperclip me-1"></i>Document
+          </a></td>
+          <td>
+            <span class="badge rounded-pill"
+                  [ngClass]="{
+                    'bg-success': request.status === 'Approved',
+                    'bg-warning text-dark': request.status === 'Pending',
+                    'bg-danger': request.status === 'Declined'
+                  }">{{ request.status }}</span>
+          </td>
+          <td>
+            <div class="d-flex flex-wrap justify-content-center gap-1">
+              <button class="btn btn-success btn-sm rounded-5" (click)="approveRequest(request)">
+                <i class="bi bi-check-circle me-1"></i>Approve
+              </button>
+              <button class="btn btn-danger btn-sm rounded-5" (click)="declineRequest(request)">
+                <i class="bi bi-x-circle me-1"></i>Decline
+              </button>
+              <button class="btn btn-outline-secondary btn-sm rounded-5" (click)="clearLeaveRequest(i)">
+                <i class="bi bi-trash me-1"></i>Clear
+              </button>
+
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredLeaveRequests.length === 0">
+          <td colspan="9" class="text-center text-muted">No leave requests found.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-2">
+      <button class="btn btn-outline-primary rounded-5" [disabled]="leaveCurrentPage === 1" (click)="prevLeavePage()">
+        <i class="bi bi-arrow-left-circle me-1"></i> Previous
+      </button>
+      <span class="fw-semibold text-muted">Page {{ leaveCurrentPage }} of {{ totalLeavePages }}</span>
+      <button class="btn btn-outline-primary rounded-5" [disabled]="leaveCurrentPage === totalLeavePages" (click)="nextLeavePage()">
+        Next <i class="bi bi-arrow-right-circle ms-1"></i>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ===== Attendance History Section (Card Layout for Mobile) ===== -->
+  <div *ngIf="activeSection === Section.History" class="p-3">
+
+    <div class="text-center bg-white p-4">
+    <!-- Filters -->
+    <div class="row mb-3">
+      <div class="col-md-2">
+        <input type="date" class="form-control" [(ngModel)]="historyFilterMonday" placeholder="Monday">
+      </div>
+      <div class="col-md-2">
+        <input type="date" class="form-control" [(ngModel)]="historyFilterFriday" placeholder="Friday">
+      </div>
+      <div class="col-md-2">
+        <input type="text" class="form-control" [(ngModel)]="historyFilterName" placeholder="Intern Name">
+      </div>
+      <div class="col-md-2">
+        <select class="form-select" [(ngModel)]="historyFilterDepartment" (change)="updateHistoryFields()">
+          <option value="">All Departments</option>
+          <option *ngFor="let dept of departmentList" [value]="dept">{{ dept }}</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select class="form-select" [(ngModel)]="historyFilterField">
+          <option value="">All Fields</option>
+          <option *ngFor="let field of filteredFieldsForHistory" [value]="field">{{ field }}</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100" (click)="getWeeklyRegister()">Apply</button>
+      </div>
+    </div>
+
+    <!-- Weekend Warning -->
+    <div *ngIf="weekendSelected" class="alert alert-warning">
+      Please select a Monday and Friday for the week.
+    </div>
+
+    <!-- Attendance Table -->
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle text-center">
+        <thead class="table-light">
+        <tr>
+          <th>Intern</th>
+          <th *ngFor="let day of ['Monday','Tuesday','Wednesday','Thursday','Friday']">{{ day }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let intern of paginatedHistoryInterns">
+          <td class="fw-bold">{{ intern.name }}</td>
+          <td *ngFor="let day of ['Monday','Tuesday','Wednesday','Thursday','Friday']">
+            <div class="d-flex flex-column align-items-center">
+              <img *ngIf="intern.recordsByDay[day]?.image" [src]="intern.recordsByDay[day].image" alt="Signature" class="img-thumbnail mb-1" style="width:50px; height:50px;">
+              <span>{{ intern.recordsByDay[day]?.action }}</span>
+              <small *ngIf="intern.recordsByDay[day]?.timeIn">In: {{ intern.recordsByDay[day].timeIn | date:'shortTime' }}</small>
+              <small *ngIf="intern.recordsByDay[day]?.timeOut">Out: {{ intern.recordsByDay[day].timeOut | date:'shortTime' }}</small>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <button class="btn btn-outline-primary" (click)="prevHistoryPage()" [disabled]="historyPage <= 1">Previous</button>
+      <span>Page {{ historyPage }} of {{ totalHistoryPages }}</span>
+      <button class="btn btn-outline-primary" (click)="nextHistoryPage()" [disabled]="historyPage >= totalHistoryPages">Next</button>
+    </div>
+
+  </div>
+  </div>
+
+  <!-- ===================== REPORTS SECTION ===================== -->
+  <div *ngIf="activeSection === 'reports'">
+    <div class="card shadow-sm p-3 p-md-4 mb-4 rounded-4">
+      <h4 class="text-primary fw-bold mb-3"><i class="bi bi-file-earmark-text me-2"></i>Generate Reports</h4>
+      <hr />
+
+      <!-- Filters -->
+      <div class="row g-3 align-items-end mb-4">
+        <div class="col-12 col-md-3">
+          <label class="form-label fw-medium">Intern Name</label>
+          <input type="text" class="form-control" [(ngModel)]="reportInternName" />
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label fw-medium">Department</label>
+          <select class="form-select" [(ngModel)]="reportDepartment" (change)="updateReportFields()">
+            <option value="">All</option>
+            <option *ngFor="let dept of departmentList" [value]="dept">{{ dept }}</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label fw-medium">Field</label>
+          <select class="form-select" [(ngModel)]="reportField">
+            <option value="">All</option>
+            <option *ngFor="let field of filteredFieldsForReport" [value]="field">{{ field }}</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-3 text-center text-md-end">
+          <button class="btn btn-outline-primary rounded-5 me-2 mb-2 mb-md-0" (click)="generateReport()">
+            <i class="bi bi-search me-1"></i>Generate
+          </button>
+          <button class="btn btn-outline-secondary rounded-5" (click)="resetReportFilter()">
+            <i class="bi bi-arrow-repeat me-1"></i>Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Report Results Table -->
+      <div class="table-responsive">
+        <table class="table table-hover align-middle text-center">
+          <thead class="table-light">
+          <tr>
+            <th>Intern</th>
+            <th>Department</th>
+            <th>Field</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Leave</th>
+            <th>Attendance %</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let record of filteredReportData">
+            <td>{{ record.name }}</td>
+            <td>{{ record.department }}</td>
+            <td>{{ record.field }}</td>
+            <td class="text-success">{{ record.present }}</td>
+            <td class="text-danger">{{ record.absent }}</td>
+            <td class="text-warning">{{ record.leave }}</td>
+            <td><span class="badge bg-primary">{{ record.attendanceRate }}%</span></td>
+          </tr>
+          <tr *ngIf="filteredReportData.length === 0">
+            <td colspan="7" class="text-center text-muted">No reports found for the selected filters.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Export Buttons -->
+      <div class="text-center mt-3 d-flex flex-wrap justify-content-center gap-2">
+        <button class="btn btn-danger rounded-5 me-2" (click)="downloadReportPDF()">
+          <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+        </button>
+        <button class="btn btn-success rounded-5" (click)="downloadReportExcel()">
+          <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
