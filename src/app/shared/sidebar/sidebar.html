@@ -1,0 +1,53 @@
+<div class="sidebar" [class.collapsed]="isCollapsed">
+  <!-- Sidebar Header -->
+  <div class="sidebar-header">
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="sidebar-logo" *ngIf="!isCollapsed">
+        <img src="assets/univen-logo.png" alt="Logo" class="logo-img">
+        <h6 class="mb-0 ms-2">Univen</h6>
+      </div>
+      <button class="btn btn-link text-white p-0" (click)="toggleSidebar()" type="button">
+        <i class="bi" [class.bi-chevron-left]="!isCollapsed" [class.bi-chevron-right]="isCollapsed"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- User Profile Section -->
+  <div class="sidebar-user" *ngIf="!isCollapsed">
+    <div class="user-info">
+      <div class="user-avatar">
+        <i class="bi bi-person-circle"></i>
+      </div>
+      <div class="user-details">
+        <div class="user-name">{{ user.fullName }}</div>
+        <div class="user-email">{{ user.email }}</div>
+        <span class="badge bg-primary mt-1">{{ user.role }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Items -->
+  <nav class="sidebar-nav">
+    <ul class="nav flex-column">
+      <li class="nav-item" *ngFor="let item of getSidebarItems()">
+        <a 
+          class="nav-link" 
+          [class.active]="isActive(item)"
+          (click)="handleItemClick(item, $event)"
+          [href]="item.route || '#'"
+          [attr.aria-current]="isActive(item) ? 'page' : null">
+          <i class="bi" [ngClass]="item.icon"></i>
+          <span *ngIf="!isCollapsed">{{ item.label }}</span>
+          <span *ngIf="item.badge && !isCollapsed" class="badge bg-danger ms-auto">{{ item.badge }}</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Sidebar Footer -->
+  <div class="sidebar-footer" *ngIf="!isCollapsed">
+    <div class="text-center text-white-50 small">
+      <i class="bi bi-clock"></i> {{ currentTime }}
+    </div>
+  </div>
+</div>

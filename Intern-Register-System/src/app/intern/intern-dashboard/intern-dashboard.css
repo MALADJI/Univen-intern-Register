@@ -1,0 +1,35 @@
+/* Main content area with sidebar */
+.main-content {
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+  min-height: 100vh;
+  padding-top: 56px; /* Account for fixed navbar */
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+}
+
+.container {
+  margin-top: 0 !important;
+  margin-bottom: 80px !important;
+  padding: 0 !important;
+}
+
+/* Hide top navigation pills when sidebar is active */
+.main-content .nav-pills {
+  display: none;
+}
+
+/* Hide user card when sidebar is active */
+.main-content .card.shadow-sm.border-0.p-3:first-child {
+  display: none;
+}
+
+/* Existing styles */
+body {
+  margin: 0;
+  padding: 0;
+}

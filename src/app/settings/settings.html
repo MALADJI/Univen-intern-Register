@@ -1,0 +1,180 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0"><i class="bi bi-gear-fill me-2"></i>Settings</h4>
+        </div>
+        <div class="card-body p-4">
+          
+          <!-- Profile Section -->
+          <div class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="mb-0">Profile Information</h5>
+              <button 
+                *ngIf="!editMode" 
+                class="btn btn-sm btn-outline-primary"
+                (click)="toggleEditMode()">
+                <i class="bi bi-pencil me-1"></i>Edit
+              </button>
+            </div>
+
+            <div *ngIf="isLoading" class="text-center py-3">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+
+            <div *ngIf="!isLoading">
+              <div *ngIf="!editMode" class="profile-display">
+                <div class="mb-3">
+                  <label class="form-label fw-semibold text-muted">Full Name</label>
+                  <p class="form-control-plaintext">{{ getFullName() }}</p>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-semibold text-muted">Email</label>
+                  <p class="form-control-plaintext">{{ profile.email || profile.username }}</p>
+                </div>
+                <div class="mb-3" *ngIf="profile.role">
+                  <label class="form-label fw-semibold text-muted">Role</label>
+                  <p class="form-control-plaintext">
+                    <span class="badge bg-primary">{{ profile.role }}</span>
+                  </p>
+                </div>
+                <div class="mb-3" *ngIf="profile.department">
+                  <label class="form-label fw-semibold text-muted">Department</label>
+                  <p class="form-control-plaintext">{{ profile.department }}</p>
+                </div>
+                <div class="mb-3" *ngIf="profile.field">
+                  <label class="form-label fw-semibold text-muted">Field</label>
+                  <p class="form-control-plaintext">{{ profile.field }}</p>
+                </div>
+                <div class="mb-3" *ngIf="profile.supervisor">
+                  <label class="form-label fw-semibold text-muted">Supervisor</label>
+                  <p class="form-control-plaintext">{{ profile.supervisor }}</p>
+                </div>
+              </div>
+
+              <div *ngIf="editMode" class="profile-edit">
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">First Name</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    [(ngModel)]="editedProfile.name"
+                    required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Surname</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    [(ngModel)]="editedProfile.surname"
+                    required>
+                </div>
+                <div class="d-flex gap-2">
+                  <button 
+                    class="btn btn-primary"
+                    (click)="saveProfile()"
+                    [disabled]="isLoading">
+                    Save Changes
+                  </button>
+                  <button 
+                    class="btn btn-secondary"
+                    (click)="cancelEdit()"
+                    [disabled]="isLoading">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Change Password Section -->
+          <div class="mb-4">
+            <h5 class="mb-3">Change Password</h5>
+            <div class="alert alert-info small mb-3" role="alert">
+              <strong>Password Requirements:</strong>
+              <ul class="mb-0 small">
+                <li>At least 8 characters long</li>
+                <li>At least one lowercase letter (a-z)</li>
+                <li>At least one uppercase letter (A-Z)</li>
+                <li>At least one digit (0-9)</li>
+                <li>At least one special character (@$!%*?&)</li>
+              </ul>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Current Password</label>
+              <div class="input-group">
+                <input 
+                  [type]="showCurrentPassword ? 'text' : 'password'" 
+                  class="form-control" 
+                  [(ngModel)]="currentPassword"
+                  placeholder="Enter current password">
+                <button 
+                  class="btn btn-outline-secondary" 
+                  type="button" 
+                  (click)="toggleCurrentPasswordVisibility()">
+                  <span *ngIf="!showCurrentPassword">👁️</span>
+                  <span *ngIf="showCurrentPassword">🙈</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">New Password</label>
+              <div class="input-group">
+                <input 
+                  [type]="showNewPassword ? 'text' : 'password'" 
+                  class="form-control" 
+                  [(ngModel)]="newPassword"
+                  placeholder="Enter new password">
+                <button 
+                  class="btn btn-outline-secondary" 
+                  type="button" 
+                  (click)="toggleNewPasswordVisibility()">
+                  <span *ngIf="!showNewPassword">👁️</span>
+                  <span *ngIf="showNewPassword">🙈</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Confirm New Password</label>
+              <div class="input-group">
+                <input 
+                  [type]="showConfirmPassword ? 'text' : 'password'" 
+                  class="form-control" 
+                  [(ngModel)]="confirmPassword"
+                  placeholder="Confirm new password">
+                <button 
+                  class="btn btn-outline-secondary" 
+                  type="button" 
+                  (click)="toggleConfirmPasswordVisibility()">
+                  <span *ngIf="!showConfirmPassword">👁️</span>
+                  <span *ngIf="showConfirmPassword">🙈</span>
+                </button>
+              </div>
+            </div>
+
+            <button 
+              class="btn btn-primary"
+              (click)="changePassword()"
+              [disabled]="isChangingPassword">
+              <span *ngIf="!isChangingPassword">Change Password</span>
+              <span *ngIf="isChangingPassword">
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                Changing...
+              </span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

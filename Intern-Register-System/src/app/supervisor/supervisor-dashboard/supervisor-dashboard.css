@@ -1,0 +1,78 @@
+/* Main content area with sidebar */
+.main-content {
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+  min-height: 100vh;
+  padding-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+}
+
+.container{
+  margin-top: 0 !important;
+  margin-bottom: 80px !important;
+  padding: 0 !important;
+}
+
+/* Hide top navigation pills when sidebar is active */
+.main-content .nav-pills {
+  display: none;
+}
+
+/* Hide user card when sidebar is active */
+.main-content .card.shadow-sm.border-0.p-3:first-child {
+  display: none;
+}
+
+.sidebar{
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.sidebar .nav-link{
+  cursor: pointer !important;
+}
+
+.navbar .nav-link.disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.nav-link{
+  color: #000000 !important;
+  font-weight: 500 !important;
+}
+
+nav-link:focus,
+.nav-link.active {
+  color: #000000 !important;
+  font-weight: 600 !important;
+  background-color: rgba(175, 149, 5, 0.50) !important;
+  border-radius: 30px !important;
+  padding: 0.5rem 1rem !important;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.nav-link:hover{
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  background: rgba(140, 119, 7, 0.62) !important;
+  border-radius: 50px !important;
+}
+
+.supervisor-info h5 {
+  font-weight: 600;
+}
+
+.supervisor-info .badge {
+  font-size: 0.8rem;
+  padding: 0.4em 0.7em;
+}
+
+.card .img-fluid.rounded-circle {
+  border: 2px solid #007bff20;
+}
