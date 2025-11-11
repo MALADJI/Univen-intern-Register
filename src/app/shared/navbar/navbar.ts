@@ -1,13 +1,12 @@
 import {Component, OnInit, OnDestroy } from '@angular/core';
 import {RouterLink} from '@angular/router';
-import {NgIf, NgOptimizedImage} from '@angular/common';
+import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-navbar',
+  standalone: true,
   imports: [
-    RouterLink,
-    NgIf,
-    NgOptimizedImage
+    RouterLink
   ],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css'
@@ -18,14 +17,30 @@ export class Navbar implements OnInit, OnDestroy{
   showProfile = false;
 
   user = {
-    fullName: 'Dzulani Monyayi',
-    email: 'dzulani.monyayi@univen.ac.za'
+    fullName: '',
+    email: ''
   };
 
+  constructor(private authService: Auth) {}
 
   ngOnInit(): void{
     this.updateTime();
     this.timer = setInterval(() => this.updateTime(), 1000);
+    
+    // Get current user from auth service
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser) {
+      this.user = {
+        fullName: currentUser.name || 'User',
+        email: currentUser.email || ''
+      };
+    } else {
+      // Fallback if no user is logged in
+      this.user = {
+        fullName: 'User',
+        email: ''
+      };
+    }
   }
 
   ngOnDestroy(): void{

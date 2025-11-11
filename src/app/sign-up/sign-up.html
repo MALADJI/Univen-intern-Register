@@ -1,111 +1,551 @@
-<div class="container-fluid d-flex flex-column flex-lg-row justify-content-center align-items-center py-5 min-vh-100 px-3 gap-5">
-
-  <!-- Right Card: Sign-Up Form -->
-  <div class="card col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4 p-md-5 shadow-lg rounded-4 border-0">
-    <h3 class="text-center formHeading fw-semibold mb-5">SIGN UP</h3>
-
-    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
-
-      <!-- Name and Surname -->
-      <div class="row mb-3 g-3">
-        <div class="col-12 col-md-6">
-          <label class="form-label text-dark fw-medium">First Name</label>
-          <input type="text" formControlName="name" class="form-control" placeholder="Enter your first name">
+<div class="container-fluid d-flex justify-content-center align-items-center py-4 min-vh-100 px-3">
+  <!-- Sign-Up Form Card -->
+  <div class="card col-12 col-sm-11 col-md-10 col-lg-9 col-xl-8 p-4 p-md-5 shadow-lg rounded-4 border-0 signup-card">
+    <!-- Header with Logo and Title -->
+    <div class="signup-header mb-4 pb-3 border-bottom">
+      <div class="d-flex align-items-center mb-3">
+        <div class="logo-wrapper me-3">
+          <img src="assets/univen-logo-2.png" 
+               alt="University of Venda Logo" 
+               class="form-logo"
+               height="70" 
+               width="70">
         </div>
-        <div class="col-12 col-md-6">
-          <label class="form-label text-dark fw-medium">Surname</label>
-          <input type="text" formControlName="surname" class="form-control" placeholder="Enter your surname">
+        <div class="flex-grow-1">
+          <h2 class="formHeading fw-bold mb-2">
+            <i class="bi bi-person-plus-fill me-2 text-primary"></i>
+            Create Your Account
+          </h2>
+          <p class="text-muted mb-0 lead">
+            Join the University of Venda Intern Program
+          </p>
+        </div>
+      </div>
+      <div class="header-subtitle">
+        <p class="text-muted small mb-0">
+          <i class="bi bi-shield-check me-1 text-success"></i>
+          Secure registration process for interns, supervisors, and administrators
+        </p>
+      </div>
+    </div>
+
+    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" novalidate>
+      <div class="row g-3">
+        <!-- Left Column -->
+        <div class="col-12 col-lg-6">
+          <!-- Name and Surname -->
+          <div class="mb-3">
+            <label for="firstName" class="form-label text-dark fw-medium">
+              First Name <span class="text-danger">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="firstName" 
+              formControlName="name" 
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('name')"
+              [class.is-valid]="signupForm.get('name')?.valid && signupForm.get('name')?.touched"
+              placeholder="Enter your first name"
+              autocomplete="given-name">
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('name')">
+              {{ getFieldError('name') }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="surname" class="form-label text-dark fw-medium">
+              Surname <span class="text-danger">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="surname" 
+              formControlName="surname" 
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('surname')"
+              [class.is-valid]="signupForm.get('surname')?.valid && signupForm.get('surname')?.touched"
+              placeholder="Enter your surname"
+              autocomplete="family-name">
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('surname')">
+              {{ getFieldError('surname') }}
+            </div>
+          </div>
+
+          <!-- Role Selector -->
+          <div class="mb-3">
+            <label for="role" class="form-label text-dark fw-medium">
+              User Role <span class="text-danger">*</span>
+            </label>
+            <select 
+              id="role" 
+              formControlName="role" 
+              class="form-select"
+              [class.is-invalid]="isFieldInvalid('role')"
+              [class.is-valid]="signupForm.get('role')?.valid && signupForm.get('role')?.touched"
+              title="Select your role">
+              <option value="" disabled selected>Select your role</option>
+              <option value="intern">Intern</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="admin">Admin</option>
+            </select>
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('role')">
+              {{ getFieldError('role') }}
+            </div>
+          </div>
+
+          <!-- Employer Name (Only for Interns) -->
+          <div class="mb-3" *ngIf="isInternSelected()">
+            <label for="employerName" class="form-label text-dark fw-medium">
+              Employer Name <span class="text-danger">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="employerName" 
+              formControlName="employerName" 
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('employerName')"
+              [class.is-valid]="signupForm.get('employerName')?.valid && signupForm.get('employerName')?.touched"
+              placeholder="Enter your employer's name"
+              autocomplete="organization">
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('employerName')">
+              {{ getFieldError('employerName') }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-12 col-lg-6">
+          <!-- Staff Email with Send Code Button -->
+          <div class="mb-3">
+            <label for="staffEmail" class="form-label text-dark fw-medium">
+              Staff Email <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <input 
+                type="email" 
+                id="staffEmail" 
+                formControlName="staffEmail" 
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('staffEmail')"
+                [class.is-valid]="signupForm.get('staffEmail')?.valid && signupForm.get('staffEmail')?.touched"
+                placeholder="yourname@univen.ac.za"
+                autocomplete="email">
+              <button 
+                type="button"
+                class="btn btn-outline-primary fw-semibold shadow-sm"
+                (click)="sendCode()"
+                [disabled]="isCodeSent || isFieldInvalid('staffEmail')"
+                aria-label="Send verification code">
+                <i class="bi bi-envelope me-1"></i>
+                <span *ngIf="!isCodeSent">Send Code</span>
+                <span *ngIf="isCodeSent">Resend ({{ countdown }}s)</span>
+              </button>
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('staffEmail')">
+              {{ getFieldError('staffEmail') }}
+            </div>
+            <small class="form-text text-muted">Must be a valid @univen.ac.za email address</small>
+          </div>
+
+          <!-- Verification Code -->
+          <div class="mb-3">
+            <label for="verificationCode" class="form-label text-dark fw-medium">
+              Verification Code <span class="text-danger">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="verificationCode" 
+              formControlName="verificationCode" 
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('verificationCode')"
+              [class.is-valid]="signupForm.get('verificationCode')?.valid && signupForm.get('verificationCode')?.touched"
+              placeholder="Enter 6-digit code"
+              maxlength="6"
+              autocomplete="one-time-code">
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('verificationCode')">
+              {{ getFieldError('verificationCode') }}
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="mb-3">
+            <label for="password" class="form-label text-dark fw-medium">
+              Password <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <input 
+                [type]="showPassword ? 'text' : 'password'" 
+                id="password" 
+                formControlName="password" 
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('password')"
+                [class.is-valid]="signupForm.get('password')?.valid && signupForm.get('password')?.touched"
+                placeholder="Create a strong password"
+                autocomplete="new-password">
+              <button 
+                type="button" 
+                class="btn btn-outline-secondary"
+                (click)="togglePasswordVisibility()"
+                aria-label="Toggle password visibility">
+                <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+              </button>
+            </div>
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('password')">
+              {{ getFieldError('password') }}
+            </div>
+            <!-- Password Strength Indicator -->
+            <div *ngIf="signupForm.get('password')?.value" class="mt-2">
+              <div class="password-strength">
+                <div class="strength-bars">
+                  <div class="strength-bar" 
+                       [class.active]="getPasswordStrength().level >= 1"
+                       [class.bg-danger]="getPasswordStrength().level === 1"
+                       [class.bg-warning]="getPasswordStrength().level === 2"
+                       [class.bg-info]="getPasswordStrength().level === 3"
+                       [class.bg-success]="getPasswordStrength().level >= 4"></div>
+                  <div class="strength-bar" 
+                       [class.active]="getPasswordStrength().level >= 2"
+                       [class.bg-warning]="getPasswordStrength().level === 2"
+                       [class.bg-info]="getPasswordStrength().level === 3"
+                       [class.bg-success]="getPasswordStrength().level >= 4"></div>
+                  <div class="strength-bar" 
+                       [class.active]="getPasswordStrength().level >= 3"
+                       [class.bg-info]="getPasswordStrength().level === 3"
+                       [class.bg-success]="getPasswordStrength().level >= 4"></div>
+                  <div class="strength-bar" 
+                       [class.active]="getPasswordStrength().level >= 4"
+                       [class.bg-success]="getPasswordStrength().level >= 4"></div>
+                </div>
+                <small class="text-muted">
+                  <span class="badge" [ngClass]="'bg-' + getPasswordStrength().color">
+                    {{ getPasswordStrength().label }}
+                  </span>
+                </small>
+              </div>
+              <small class="form-text text-muted d-block mt-1">
+                Password must be at least 8 characters and include uppercase, lowercase, number, and special character
+              </small>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Staff Email with Send Code Button -->
-      <div class="mb-3">
-        <label class="form-label text-dark fw-medium">Staff Email</label>
-        <div class="input-group">
-          <input type="email" formControlName="staffEmail" class="form-control" placeholder="Enter your staff email">
-          <button type="button"
-                  class="btn btn-outline-primary fw-semibold shadow-sm"
-                  (click)="sendCode()"
-                  [disabled]="isCodeSent">
-            Send Code
-          </button>
+      <!-- Department and Confirm Password on Same Row -->
+      <div class="row g-3 mb-3">
+        <div class="col-12 col-lg-6">
+          <!-- Department Selector -->
+          <div class="mb-3">
+            <label for="department" class="form-label text-dark fw-medium">
+              Department <span class="text-danger">*</span>
+            </label>
+            <select
+              id="department"
+              formControlName="department"
+              class="form-select"
+              [class.is-invalid]="isFieldInvalid('department')"
+              [class.is-valid]="signupForm.get('department')?.valid && signupForm.get('department')?.touched"
+              (change)="onDepartmentChange()"
+              title="Select your department">
+              <option value="" disabled selected>Select your department</option>
+              <option value="ICT">ICT</option>
+              <option value="HR">HR</option>
+              <option value="Finance">Finance</option>
+              <option value="Marketing">Marketing</option>
+            </select>
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('department')">
+              {{ getFieldError('department') }}
+            </div>
+          </div>
         </div>
-        <!-- Countdown next to button -->
-        <div *ngIf="isCodeSent" class="text-muted small mt-1">
-          ({{ countdown }}s)
+        <div class="col-12 col-lg-6">
+          <!-- Confirm Password -->
+          <div class="mb-3">
+            <label for="confirmPassword" class="form-label text-dark fw-medium">
+              Confirm Password <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <input 
+                [type]="showConfirmPassword ? 'text' : 'password'" 
+                id="confirmPassword" 
+                formControlName="confirmPassword" 
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('confirmPassword')"
+                [class.is-valid]="signupForm.get('confirmPassword')?.valid && signupForm.get('confirmPassword')?.touched"
+                placeholder="Re-enter your password"
+                autocomplete="new-password">
+              <button 
+                type="button" 
+                class="btn btn-outline-secondary"
+                (click)="toggleConfirmPasswordVisibility()"
+                aria-label="Toggle confirm password visibility">
+                <i class="bi" [ngClass]="showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+              </button>
+            </div>
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('confirmPassword')">
+              {{ getFieldError('confirmPassword') }}
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Verification Code -->
-      <div class="mb-3">
-        <label class="form-label text-dark fw-medium">Verification Code</label>
-        <input type="text" formControlName="verificationCode" class="form-control" placeholder="Enter the code sent to your email">
-      </div>
-
-      <!-- Role Selector -->
-      <div class="mb-3">
-        <label class="form-label text-dark fw-medium">User Role</label>
-        <select formControlName="role" class="form-select">
-          <option value="" disabled selected>Select your role</option>
-          <option value="intern">Intern</option>
-          <option value="supervisor">Supervisor</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
-
-      <!-- Department Selector -->
-      <div class="mb-4">
-        <label class="form-label text-dark fw-medium">Department</label>
+      <!-- Field Selector (Visible Only if Department Selected and Role is not Admin) -->
+      <div class="mb-3" *ngIf="shouldShowField()">
+        <label for="field" class="form-label text-dark fw-medium">
+          Field <span class="text-danger">*</span>
+        </label>
         <select
-          formControlName="department"
-          class="form-select"
-          (change)="onDepartmentChange()"
-        >
-          <option value="" disabled selected>Select your department</option>
-          <option value="ICT">ICT</option>
-          <option value="HR">HR</option>
-          <option value="Finance">Finance</option>
-          <option value="Marketing">Marketing</option>
-        </select>
-      </div>
-
-      <!-- Field Selector (Visible Only if Department Selected) -->
-      <div class="mb-4" *ngIf="selectedDepartment">
-        <label class="form-label text-dark fw-medium">Field</label>
-        <select
+          id="field"
           formControlName="field"
           class="form-select"
-          [(ngModel)]="selectedField"
-          (change)="onFieldChange()"
-        >
+          [class.is-invalid]="isFieldInvalid('field')"
+          [class.is-valid]="signupForm.get('field')?.valid && signupForm.get('field')?.touched"
+          title="Select your field">
           <option value="" disabled selected>Select your field</option>
           <option *ngFor="let field of availableFields" [value]="field">{{ field }}</option>
         </select>
+        <div class="invalid-feedback" *ngIf="isFieldInvalid('field')">
+          {{ getFieldError('field') }}
+        </div>
       </div>
 
-
-
-      <!-- Password -->
+      <!-- Terms and Conditions -->
       <div class="mb-3">
-        <label class="form-label text-dark fw-medium">Password</label>
-        <input type="password" formControlName="password" class="form-control" placeholder="Create a password">
-      </div>
-
-      <!-- Confirm Password -->
-      <div class="mb-4">
-        <label class="form-label text-dark fw-medium">Confirm Password</label>
-        <input type="password" formControlName="confirmPassword" class="form-control" placeholder="Re-enter your password">
+        <div class="form-check">
+          <input 
+            class="form-check-input" 
+            type="checkbox" 
+            id="acceptTerms" 
+            formControlName="acceptTerms"
+            [class.is-invalid]="isFieldInvalid('acceptTerms')">
+          <label class="form-check-label" for="acceptTerms">
+            I have read and agree to the 
+            <a href="javascript:void(0)" 
+               class="text-primary fw-semibold text-decoration-underline"
+               (click)="openTermsModal()"
+               (keydown.enter)="openTermsModal()"
+               (keydown.space)="openTermsModal()">
+              Terms and Conditions
+            </a>
+            <span class="text-danger">*</span>
+          </label>
+        </div>
+        <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('acceptTerms')">
+          {{ getFieldError('acceptTerms') }}
+        </div>
       </div>
 
       <!-- Submit Button -->
-      <button type="submit" class="btn loginBtn w-100 fw-bold mb-3 shadow-sm"routerLink="/intern/intern-dashboard">
-        Sign Up
+      <button 
+        type="submit" 
+        class="btn loginBtn w-100 fw-bold mb-2 shadow-sm"
+        [disabled]="signupForm.invalid">
+        <i class="bi bi-person-plus me-2"></i>
+        Create Account
       </button>
     </form>
 
-    <p class="text-center mt-1 mb-0 text-secondary">
+    <p class="text-center mt-3 mb-0 text-secondary">
       Already have an account?
-      <a routerLink="/admin/admin-dashboard" class="logbtcol fw-semibold text-decoration-none">Login</a>
+      <a routerLink="/login" class="logbtcol fw-semibold text-decoration-none">Login</a>
     </p>
   </div>
 </div>
+
+<!-- Terms and Conditions Modal -->
+<div class="modal fade" 
+     id="termsModal" 
+     tabindex="-1" 
+     aria-labelledby="termsModalLabel" 
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title fw-bold" id="termsModalLabel">
+          <i class="bi bi-file-text me-2"></i>
+          Terms and Conditions - University of Venda
+        </h5>
+        <button 
+          type="button" 
+          class="btn-close btn-close-white" 
+          data-bs-dismiss="modal"
+          aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="terms-content">
+          <h6 class="fw-bold text-primary mb-3">1. Acceptance of Terms</h6>
+          <p>
+            By accessing and using the Intern Online Register System ("the System") operated by the University of Venda ("Univen"), 
+            you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions. If you do not 
+            agree to these terms, you must not use the System.
+          </p>
+
+          <h6 class="fw-bold text-primary mb-3 mt-4">2. Eligibility and Registration</h6>
+          <p>
+            2.1. The System is exclusively available to authorized personnel of the University of Venda, including interns, 
+            supervisors, and administrative staff.
+          </p>
+          <p>
+            2.2. You must provide accurate, current, and complete information during registration. You are responsible for 
+            maintaining the confidentiality of your account credentials.
+          </p>
+          <p>
+            2.3. You must use a valid University of Venda email address (@univen.ac.za) for registration and verification.
+          </p>
+          <p>
+            2.4. You are responsible for all activities that occur under your account. You must immediately notify the 
+            University of any unauthorized use of your account.
+          </p>
+
+          <h6 class="fw-bold text-primary mb-3 mt-4">3. User Responsibilities</h6>
+          <p>
+            3.1. <strong>Interns:</strong> You are required to accurately record your attendance, submit leave requests in 
+            a timely manner, and comply with all University policies and procedures.
+          </p>
+          <p>
+            3.2. <strong>Supervisors:</strong> You are responsible for reviewing and approving leave requests, monitoring 
+            intern attendance, and ensuring compliance with departmental requirements.
+          </p>
+          <p>
+            3.3. <strong>Administrators:</strong> You are responsible for system management, user administration, and 
+            ensuring data integrity and security.
+          </p>
+          <p>
+            3.4. All users must use the System in accordance with University policies, applicable laws, and regulations.
+          </p>
+
+          <h6 class="fw-bold text-primary mb-3 mt-4">4. Attendance and Leave Management</h6>
+          <p>
+            4.1. Attendance records must be accurate and submitted in real-time. Falsification of attendance records is 
+            strictly prohibited and may result in disciplinary action.
+          </p>
+          <p>
+            4.2. Leave requests must be submitted in advance, except in cases of emergency. All leave requests are subject 
+            to approval by authorized supervisors.
+          </p>
+          <p>
+            4.3. The University reserves the right to verify attendance records and may require additional documentation 
+            or verification.
+          </p>
+
+          <h6 class="fw-bold text-primary mb-3 mt-4">5. Data Privacy and Security</h6>
+          <p>
+            5.1. The University of Venda is committed to protecting your personal information in accordance with the 
+            Protection of Personal Information Act (POPIA) and other applicable data protection laws.
+          </p>
+          <p>
+            5.2. Personal data collected through the System will be used solely for the purposes of intern management, 
+            attendance tracking, and administrative functions.
+          </p>
+          <p>
+            5.3. Your data will not be shared with third parties without your consent, except as required by law or 
+            University policy.
+          </p>
+          <p>
+            5.4. You have the right to access, correct, or request deletion of your personal data in accordance with 
+            applicable data protection laws.
+          </p>
+
+          <h6 class="fw-bold text-primary mb-3 mt-4">6. Intellectual Property</h6>
+          <p>
+            6.1. All content, software, and materials on the System are the property of the University of Venda and are 
+            protected by copyright and other intellectual property laws.
+          </p>
+          <p>
+            6.2. You may not reproduce, distribute, or create derivative works from any content on the System without 
+            express written permission from the University.
+          </p>
+
+          <h6 class="fw-bold text-primary mb-3 mt-4">7. Prohibited Activities</h6>
+          <p>You agree not to:</p>
+          <ul>
+            <li>Use the System for any illegal or unauthorized purpose</li>
+            <li>Attempt to gain unauthorized access to the System or related systems</li>
+            <li>Interfere with or disrupt the System's operation or security</li>
+            <li>Falsify or manipulate attendance or leave records</li>
+            <li>Share your account credentials with others</li>
+            <li>Use automated systems or bots to access the System</li>
+            <li>Transmit any malicious code, viruses, or harmful software</li>
+          </ul>
+
+          <h6 class="fw-bold text-primary mb-3 mt-4">8. System Availability and Modifications</h6>
+          <p>
+            8.1. The University strives to ensure the System is available 24/7 but does not guarantee uninterrupted 
+            access. The System may be temporarily unavailable for maintenance, updates, or due to technical issues.
+          </p>
+          <p>
+            8.2. The University reserves the right to modify, suspend, or discontinue any aspect of the System at any 
+            time without prior notice.
+          </p>
+          <p>
+            8.3. The University is not liable for any loss or damage resulting from System unavailability or modifications.
+          </p>
+
+          <h6 class="fw-bold text-primary mb-3 mt-4">9. Limitation of Liability</h6>
+          <p>
+            9.1. The University of Venda provides the System "as is" and makes no warranties, express or implied, 
+            regarding the System's accuracy, reliability, or suitability for any purpose.
+          </p>
+          <p>
+            9.2. The University shall not be liable for any direct, indirect, incidental, special, or consequential 
+            damages arising from your use of the System.
+          </p>
+
+          <h6 class="fw-bold text-primary mb-3 mt-4">10. Disciplinary Action</h6>
+          <p>
+            Violation of these Terms and Conditions may result in disciplinary action, including but not limited to:
+          </p>
+          <ul>
+            <li>Suspension or termination of your account</li>
+            <li>Disciplinary proceedings in accordance with University policies</li>
+            <li>Legal action where applicable</li>
+          </ul>
+
+          <h6 class="fw-bold text-primary mb-3 mt-4">11. Changes to Terms</h6>
+          <p>
+            The University of Venda reserves the right to modify these Terms and Conditions at any time. You will be 
+            notified of significant changes, and continued use of the System constitutes acceptance of the modified terms.
+          </p>
+
+          <h6 class="fw-bold text-primary mb-3 mt-4">12. Governing Law</h6>
+          <p>
+            These Terms and Conditions are governed by the laws of the Republic of South Africa. Any disputes arising 
+            from these terms shall be subject to the exclusive jurisdiction of the courts of South Africa.
+          </p>
+
+          <h6 class="fw-bold text-primary mb-3 mt-4">13. Contact Information</h6>
+          <p>
+            For questions or concerns regarding these Terms and Conditions or the System, please contact:
+          </p>
+          <p>
+            <strong>University of Venda</strong><br>
+            Thohoyandou, Limpopo, South Africa<br>
+            Email: info@univen.ac.za<br>
+            Website: www.univen.ac.za
+          </p>
+
+          <div class="alert alert-info mt-4">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Last Updated:</strong> {{ getCurrentDate() }}
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          data-bs-dismiss="modal">
+          Close
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-primary"
+          (click)="signupForm.patchValue({acceptTerms: true}); closeTermsModal()"
+          data-bs-dismiss="modal">
+          <i class="bi bi-check-circle me-2"></i>
+          I Accept
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
