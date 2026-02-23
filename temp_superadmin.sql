@@ -1,0 +1,1 @@
+INSERT INTO users (username, email, password, role, active, created_at) VALUES ('superadmin@univen.ac.za', 'superadmin@univen.ac.za', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'SUPER_ADMIN', TRUE, NOW());

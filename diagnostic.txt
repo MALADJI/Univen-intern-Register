@@ -1,0 +1,29 @@
+=================================================
+DIAGNOSTIC: Checking Database State for Notifications
+=================================================
+Found 2 SUPER_ADMIN users.
+ - SuperAdmin: superadmin@univen.ac.za, Email: superadmin@univen.ac.za
+ - SuperAdmin: superadmin_final_1686297494@univen.ac.za, Email: superadmin_final_1686297494@univen.ac.za
+Found 9 ADMIN users.
+ - Admin: muthu.ramavu@univen.ac.za, Email: muthu.ramavu@univen.ac.za, Active: true
+ - Admin: admin@univen.ac.za, Email: admin@univen.ac.za, Active: true
+ - Admin: elgin@univen.ac.za, Email: elgin@univen.ac.za, Active: true
+ - Admin: admin_test_1286072954@univen.ac.za, Email: admin_test_1286072954@univen.ac.za, Active: true
+ - Admin: admin_final_1686297494@univen.ac.za, Email: admin_final_1686297494@univen.ac.za, Active: true
+ - Admin: admin_setup_630622624@univen.ac.za, Email: admin_setup_630622624@univen.ac.za, Active: true
+ - Admin: admin_setup_1045390608@univen.ac.za, Email: admin_setup_1045390608@univen.ac.za, Active: true
+ - Admin: admin_setup_1405260683@univen.ac.za, Email: admin_setup_1405260683@univen.ac.za, Active: true
+ - Admin: admin_setup_762475459@univen.ac.za, Email: admin_setup_762475459@univen.ac.za, Active: true
+Found 9 SUPERVISOR users.
+ - Supervisor: muthu.ramavu2@univen.ac.za, Email: muthu.ramavu2@univen.ac.za
+ - Supervisor: supervisor@univen.ac.za, Email: supervisor@univen.ac.za
+ - Supervisor: naomi@univen.ac.za, Email: naomi@univen.ac.za
+ - Supervisor: supervisor_leave_1267478060@univen.ac.za, Email: supervisor_leave_1267478060@univen.ac.za
+ - Supervisor: supervisor_leave_818702725@univen.ac.za, Email: supervisor_leave_818702725@univen.ac.za
+ - Supervisor: supervisor_leave_630622624@univen.ac.za, Email: supervisor_leave_630622624@univen.ac.za
+ - Supervisor: supervisor_leave_1045390608@univen.ac.za, Email: supervisor_leave_1045390608@univen.ac.za
+ - Supervisor: supervisor_leave_1405260683@univen.ac.za, Email: supervisor_leave_1405260683@univen.ac.za
+ - Supervisor: supervisor_leave_762475459@univen.ac.za, Email: supervisor_leave_762475459@univen.ac.za
+Found 25 INTERN users.
+Total Notifications in DB: 108
+=================================================

@@ -2,7 +2,6 @@ package com.internregister.entity;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.EqualsAndHashCode;
@@ -30,10 +29,12 @@ public class LeaveRequest {
 
     private java.time.LocalDateTime createdAt;
     private java.time.LocalDateTime updatedAt;
+
     @PrePersist
     protected void onCreate() {
         createdAt = java.time.LocalDateTime.now();
     }
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = java.time.LocalDateTime.now();
@@ -41,9 +42,11 @@ public class LeaveRequest {
 
     private String attachmentPath;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    private String reason; // Reason for leave request (intern's reason when submitted, admin/supervisor's decline message when rejected)
+
+    @ManyToOne
     @JoinColumn(name = "intern_id")
     @ToString.Exclude
-    @JsonIgnoreProperties({"leaveRequests", "attendanceRecords", "department", "supervisor"})
+    @JsonBackReference
     private Intern intern;
 }

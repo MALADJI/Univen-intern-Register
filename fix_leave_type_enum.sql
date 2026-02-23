@@ -1,19 +1,21 @@
--- Fix invalid LeaveType enum values in the database
--- This script updates any invalid enum values to match the Java enum constants
+-- Fix Leave Type Enum Mismatch
+-- This script checks for invalid leave_type values and updates them
 
--- Update "Sick Leave" to "SICK"
-UPDATE leave_requests 
-SET leave_type = 'SICK' 
-WHERE leave_type = 'Sick Leave' OR leave_type = 'SICK_LEAVE' OR leave_type = 'Sick Leave';
+-- Check current leave types in database
+SELECT DISTINCT leave_type, COUNT(*) as count
+FROM leave_requests
+GROUP BY leave_type;
 
--- Update any other variations
-UPDATE leave_requests 
-SET leave_type = UPPER(REPLACE(leave_type, ' ', '_'))
-WHERE leave_type LIKE '% %';
+-- Note: CASUAL and OTHER are now valid enum values in LeaveType.java
+-- If you see any other invalid values, update them to one of the valid ones below
 
--- Verify valid enum values:
--- SICK, ANNUAL, CASUAL, EMERGENCY, OTHER, UNPAID, STUDY
+-- Valid LeaveType enum values are:
+-- ANNUAL, SICK, PERSONAL, EMERGENCY, CASUAL, OTHER
+-- 
+-- If you have any other invalid values, you can update them like this:
+-- UPDATE leave_requests SET leave_type = 'PERSONAL' WHERE leave_type = 'INVALID_VALUE';
 
--- Check current values
-SELECT DISTINCT leave_type FROM leave_requests;
-
+-- Verify all leave types are valid
+SELECT DISTINCT leave_type, COUNT(*) as count
+FROM leave_requests
+GROUP BY leave_type;

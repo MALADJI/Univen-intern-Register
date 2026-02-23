@@ -31,6 +31,26 @@ public class Intern {
     @JoinColumn(name = "supervisor_id")
     private Supervisor supervisor;
 
+    @ManyToOne
+    @JoinColumn(name = "location_id")
+    private Location location;
+
+    private String field;
+    private String employer;
+    
+    @Column(name = "id_number")
+    private String idNumber;
+    
+    @Column(name = "start_date")
+    private java.time.LocalDate startDate;
+    
+    @Column(name = "end_date")
+    private java.time.LocalDate endDate;
+
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] signature;
+
     @OneToMany(mappedBy = "intern", cascade = CascadeType.ALL)
     @ToString.Exclude
     @JsonManagedReference
